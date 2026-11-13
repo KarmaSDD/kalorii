@@ -107,11 +107,22 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .primary{width:100%;border:0;background:var(--accent);color:var(--accent-ink);padding:14px;border-radius:14px;font-weight:600;font-size:16px;margin-top:6px}
 .ghost{width:100%;border:0;background:transparent;color:var(--muted);padding:12px;font-size:15px}
 .err{color:var(--warn);font-size:14px;min-height:20px;margin:0 0 4px}
+.second{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--accent);padding:13px;border-radius:14px;font-weight:600;font-size:16px;margin-top:8px}
+.drop{border:1px solid var(--line);border-radius:12px;background:var(--bg);max-height:42vh;overflow:auto;padding:0 12px;margin:-4px 0 10px}
+.drop .note{margin:12px 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg button{border:0;background:transparent;padding:9px 4px;border-radius:9px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600}
+.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ing:first-child{border-top:0}
+.ing .amt{width:76px;flex:none;font-size:16px;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);text-align:right}
+.ing .unit{color:var(--muted);font-size:14px;min-width:38px}
+.danger-ghost{width:100%;border:0;background:transparent;color:var(--warn);padding:12px;font-size:15px}
 
 /* tabs */
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,0px);z-index:10}
-.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-.tab{border:0;background:transparent;padding:12px 4px;border-radius:12px;font-weight:500;color:var(--muted)}
+.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tab{border:0;background:transparent;padding:12px 2px;border-radius:12px;font-weight:500;font-size:15px;color:var(--muted)}
 .tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg)}
 
 /* week */
@@ -148,6 +159,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   <div>
     <button class="tab" data-view="today">Сьогодні</button>
     <button class="tab" data-view="week">Тиждень</button>
+    <button class="tab" data-view="foods">Продукти</button>
     <button class="tab" data-view="settings">Ціль</button>
   </div>
 </nav>
@@ -157,12 +169,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     <h3 id="sh-title">Що ти з’їв?</h3>
     <div id="pick">
       <label class="field"><span>Пошук серед збережених</span><input id="f-search" type="text" autocomplete="off" placeholder="Почни вводити назву"></label>
-      <div class="srcrow">
-        <button id="f-scan">Сканувати штрихкод</button>
-        <button id="f-remote">Шукати в базі USDA</button>
-      </div>
-      <div class="plist" id="plist"></div>
-      <button class="primary" id="f-new">Нова страва або продукт</button>
+      <div class="drop" id="plist"></div>
+      <button class="second" id="f-goto" style="margin-top:0">Відкрити «Продукти»</button>
       <button class="ghost" id="f-cancel">Закрити</button>
     </div>
     <div id="scanview" hidden>
@@ -170,25 +178,42 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       <p class="note" id="scan-msg" role="status">Наведи камеру на штрихкод.</p>
       <label class="field"><span>Або введи цифри штрихкоду</span><input id="scan-manual" type="text" inputmode="numeric" placeholder="Наприклад, 5449000000996"></label>
       <button class="primary" id="scan-go">Знайти за цифрами</button>
-      <button class="ghost" id="scan-back">Назад до списку</button>
+      <button class="ghost" id="scan-back">Закрити</button>
     </div>
     <div id="remoteview" hidden>
+      <div id="rem-search">
+        <label class="field"><span>Назва англійською</span><input id="rem-q" type="text" autocomplete="off" autocapitalize="off" placeholder="Наприклад, chicken breast"></label>
+        <button class="primary" id="rem-go" style="margin:0 0 10px">Шукати</button>
+      </div>
       <p class="note" id="rem-msg" role="status" style="margin-top:0"></p>
       <div class="plist" id="rem-list"></div>
-      <button class="ghost" id="rem-back">Назад до списку</button>
+      <button class="ghost" id="rem-back">Закрити</button>
     </div>
     <div id="newform" hidden>
-      <p class="note" id="nf-note" style="margin:0 0 10px">Це потрібно зробити один раз. Вкажи значення на одну порцію, наприклад «Гречка, 100 г». Якщо така назва вже є, її значення оновляться.</p>
-      <label class="field"><span>Назва</span><input id="f-name" type="text" autocomplete="off" placeholder="Наприклад, гречка з куркою"></label>
-      <label class="field"><span>Калорії, ккал</span><input id="f-kcal" type="text" inputmode="decimal" placeholder="Можна лишити порожнім, якщо вказати БЖВ"></label>
-      <div class="grid3">
-        <label class="field"><span>Білки, г</span><input id="f-p" type="text" inputmode="decimal"></label>
-        <label class="field"><span>Вуглеводи, г</span><input id="f-c" type="text" inputmode="decimal"></label>
-        <label class="field"><span>Жири, г</span><input id="f-f" type="text" inputmode="decimal"></label>
+      <p class="note" id="nf-note" style="margin:0 0 10px"></p>
+      <label class="field"><span>Назва</span><input id="f-name" type="text" autocomplete="off" placeholder="Наприклад, гречка"></label>
+      <div id="prodfields">
+        <span class="lbl">Значення вказано</span>
+        <div class="seg" id="f-basis"><button type="button" data-basis="100g">На 100 г</button><button type="button" data-basis="portion">На порцію</button></div>
+        <label class="field"><span>Калорії, ккал</span><input id="f-kcal" type="text" inputmode="decimal" placeholder="Можна лишити порожнім, якщо вказати БЖВ"></label>
+        <div class="grid3">
+          <label class="field"><span>Білки, г</span><input id="f-p" type="text" inputmode="decimal"></label>
+          <label class="field"><span>Вуглеводи, г</span><input id="f-c" type="text" inputmode="decimal"></label>
+          <label class="field"><span>Жири, г</span><input id="f-f" type="text" inputmode="decimal"></label>
+        </div>
+      </div>
+      <div id="dishfields" hidden>
+        <span class="lbl">Інгредієнти</span>
+        <div id="ing-rows"></div>
+        <label class="field"><span>Додати інгредієнт</span><input id="ing-search" type="text" autocomplete="off" placeholder="Пошук серед продуктів"></label>
+        <div class="drop" id="ing-list" hidden></div>
+        <label class="field"><span>Скільки порцій виходить</span><input id="f-serv" type="text" inputmode="decimal" value="1"></label>
+        <p class="note" id="dish-total" role="status" style="margin:0 0 10px"></p>
       </div>
       <p class="err" id="f-err"></p>
-      <button class="primary" id="f-save">Зберегти в список</button>
-      <button class="ghost" id="f-back">Назад до списку</button>
+      <button class="primary" id="f-save">Зберегти</button>
+      <button class="danger-ghost" id="f-del" hidden>Видалити продукт</button>
+      <button class="ghost" id="f-back">Закрити</button>
     </div>
   </div>
 </div>
@@ -218,7 +243,19 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function foodsFrom(s){
     var list = Array.isArray(s.foods) ? s.foods : (Array.isArray(s.recent) ? s.recent : []);
     return list.filter(function(x){ return x && x.name; }).map(function(x){
-      return { id:x.id||uid(), name:String(x.name), kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
+      var name = String(x.name);
+      var o = { id:x.id||uid(), name:name, kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
+      /* basis: older data has no field; names ending with ", 100 г" came from the bases per 100 g */
+      o.basis = (x.basis==='100g' || x.basis==='portion') ? x.basis : (/100\s*г\s*$/i.test(name) ? '100g' : 'portion');
+      if(Array.isArray(x.ingredients) && x.ingredients.length){
+        o.basis = 'portion';
+        o.servings = +x.servings>0 ? +x.servings : 1;
+        o.ingredients = x.ingredients.filter(function(i){ return i && i.name; }).map(function(i){
+          return { foodId:String(i.foodId||''), name:String(i.name), amount:+i.amount||0, basis: i.basis==='100g' ? '100g' : 'portion',
+                   kcal:+i.kcal||0, p:+i.p||0, c:+i.c||0, f:+i.f||0 };
+        });
+      }
+      return o;
     });
   }
   function load(){
@@ -371,7 +408,6 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       + inp('weight','Вага, кг', g.weight>0 ? g.weight : '') + inp('kcal','Калорії, ккал', r(g.kcal))
       + '</div><p class="note">2 г білка і 1 г жиру на кг ваги, решта калорій іде у вуглеводи. Зміни зберігаються одразу.</p></section>'
       + '<section class="panel"><h2>Норма БЖВ</h2><div id="calc">'+calcHTML()+'</div></section>';
-    h += foodsHTML();
     h += '<section class="panel"><h2>База продуктів USDA</h2>'
       + '<label class="field"><span>Власний ключ API (необов’язково)</span><input type="text" id="usda-key" data-usda="1" autocomplete="off" autocapitalize="off" value="'+esc(state.usdaKey||'')+'"></label>'
       + '<p class="note" style="margin:0">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup.</p></section>';
@@ -391,67 +427,165 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       b.setAttribute('aria-current', b.dataset.view===view ? 'page' : 'false');
     });
     var m = $('#main');
-    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : settingsHTML();
+    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : settingsHTML();
+  }
+
+  /* ---------- products ---------- */
+  var foodQuery = '';
+  function unitLabel(x){ return x.basis==='100g' ? 'на 100 г' : (x.ingredients ? 'страва, на порцію' : 'на порцію'); }
+  function macroLine(x){ return 'Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г'; }
+  function findFood(id){ var it = null; state.foods.forEach(function(x){ if(x.id===id) it = x; }); return it; }
+  function matchFoods(q){
+    q = String(q||'').trim().toLowerCase();
+    return state.foods.filter(function(x){ return !q || x.name.toLowerCase().indexOf(q)!==-1; });
+  }
+  function foodItem(x, cls){
+    return '<button class="pitem '+cls+'" data-id="'+esc(x.id)+'"><span class="pn">'+esc(x.name)
+      + '<small>'+unitLabel(x)+'. '+macroLine(x)+'</small></span><span class="pk">'+r(x.kcal)+' ккал</span></button>';
+  }
+  function foodListHTML(){
+    if(!state.foods.length) return '<p class="note" style="margin:0">Список порожній. Додай перший продукт кнопками вище.</p>';
+    var list = matchFoods(foodQuery).slice().sort(function(a,b){ return a.name.localeCompare(b.name,'uk'); });
+    if(!list.length) return '<p class="note" style="margin:0">Нічого не знайдено.</p>';
+    return list.map(function(x){ return foodItem(x,'fitem'); }).join('');
+  }
+  function foodsHTML(){
+    var h = '<div class="dayhead"><h1>Продукти</h1></div>';
+    h += '<section class="panel"><h2>Додати</h2>'
+      + '<button class="primary" style="margin-top:0" data-act="newfood">Новий продукт</button>'
+      + '<button class="second" data-act="newdish">Нова страва з інгредієнтів</button>'
+      + '<div class="srcrow" style="margin:8px 0 0"><button data-act="scan">Сканувати штрихкод</button><button data-act="remote">Шукати в базі USDA</button></div>'
+      + '</section>';
+    h += '<section class="panel"><h2>Збережені продукти</h2>'
+      + '<label class="field"><span>Пошук</span><input id="food-q" type="text" autocomplete="off" placeholder="Почни вводити назву" value="'+esc(foodQuery)+'"></label>'
+      + '<div id="foodlist">'+foodListHTML()+'</div>'
+      + '<p class="note">Торкнися продукту, щоб змінити або видалити його. Записи за минулі дні при цьому не змінюються.</p>'
+      + '</section>';
+    return h;
   }
 
   /* ---------- sheet ---------- */
-  function foodsHTML(){
-    var h = '<section class="panel"><h2>Збережені продукти</h2>';
-    if(!state.foods.length) h += '<p class="note" style="margin:0">Список порожній. Додай першу страву через «Додати їжу» на вкладці «Сьогодні».</p>';
-    state.foods.forEach(function(x,i){
-      h += '<div class="row"'+(i===0?' style="border-top:0"':'')+'><div class="rname">'+esc(x.name)
-        + '<small>'+r(x.kcal)+' ккал, Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г</small></div>'
-        + '<button class="del" data-act="delfood" data-id="'+esc(x.id)+'" aria-label="Видалити '+esc(x.name)+' зі списку">×</button></div>';
-    });
-    return h + '</section>';
-  }
-  function renderPick(){
-    var raw = $('#f-search').value.trim(), q = raw.toLowerCase();
-    var list = state.foods.filter(function(x){ return !q || x.name.toLowerCase().indexOf(q)!==-1; });
-    var box = $('#plist');
-    if(!state.foods.length){
-      box.innerHTML = '<p class="note">Збережених продуктів ще немає. Створи першу страву нижче.</p>';
-    } else if(!list.length){
-      box.innerHTML = '<p class="note">Нічого не знайдено. Можна створити «'+esc(raw)+'» як нову страву.</p>';
-    } else {
-      box.innerHTML = list.map(function(x){
-        return '<button class="pitem" data-id="'+esc(x.id)+'"><span class="pn">'+esc(x.name)
-          + '<small>Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г</small></span><span class="pk">'+r(x.kcal)+' ккал</span></button>';
-      }).join('');
-    }
-  }
   var VIEWS = ['pick','scanview','remoteview','newform'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
-  function showPick(){
-    only('pick');
-    $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
-    renderPick();
-  }
-  var NF_NOTE = 'Це потрібно зробити один раз. Вкажи значення на одну порцію, наприклад «Гречка, 100 г». Якщо така назва вже є, її значення оновляться.';
-  var NF_NOTE_REMOTE = 'Значення з бази на 100 г. Перевір їх, за потреби зміни назву чи цифри (наприклад, на свою порцію) і збережи.';
-  function showNew(name, vals){
-    ['#f-kcal','#f-p','#f-c','#f-f'].forEach(function(s){ $(s).value=''; });
-    $('#nf-note').textContent = vals ? NF_NOTE_REMOTE : NF_NOTE;
-    if(vals){
-      $('#f-kcal').value = r(vals.kcal);
-      $('#f-p').value = vals.p ? Math.round(vals.p*10)/10 : '';
-      $('#f-c').value = vals.c ? Math.round(vals.c*10)/10 : '';
-      $('#f-f').value = vals.f ? Math.round(vals.f*10)/10 : '';
+  function openOverlay(){ $('#overlay').classList.add('open'); }
+  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); }
+
+  function renderPick(){
+    var list = matchFoods($('#f-search').value);
+    var box = $('#plist');
+    if(!state.foods.length){
+      box.innerHTML = '<p class="note">Продуктів ще немає. Спочатку додай їх у вкладці «Продукти».</p>';
+    } else if(!list.length){
+      box.innerHTML = '<p class="note">Нічого не знайдено. Нові продукти додаються у вкладці «Продукти».</p>';
+    } else {
+      box.innerHTML = list.map(function(x){ return foodItem(x,'aitem'); }).join('');
     }
-    $('#f-name').value = name || '';
-    $('#f-err').textContent = '';
-    only('newform');
-    $('#sh-title').textContent = 'Нова страва або продукт';
-    if(!vals) setTimeout(function(){ (name ? $('#f-kcal') : $('#f-name')).focus(); }, 50);
   }
   function openSheet(meal){
     sheetMeal = mealKey(meal)==='other' ? 'snack' : meal;
     $('#f-search').value = '';
-    showPick();
-    $('#overlay').classList.add('open');
+    only('pick');
+    $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
+    renderPick();
+    openOverlay();
     if(state.foods.length) setTimeout(function(){ $('#f-search').focus(); }, 50);
   }
-  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); }
+
+  /* ---------- product and dish form ---------- */
+  var editId = null, formKind = 'food', formBasis = '100g', dishRows = [], armedDel = false;
+  var NOTE_FOOD = 'Вкажи значення на 100 г або на одну порцію, наприклад на одне яйце.';
+  var NOTE_REMOTE = 'Значення з бази на 100 г. Перевір їх і за потреби зміни назву чи цифри.';
+  var NOTE_DISH = 'Додай інгредієнти зі своїх продуктів і вкажи кількість кожного. Калорії й БЖВ порахуються самі.';
+  function fmt(n){ return n ? String(Math.round(n*10)/10) : ''; }
+  function setBasis(b){
+    formBasis = b==='portion' ? 'portion' : '100g';
+    document.querySelectorAll('#f-basis button').forEach(function(btn){
+      btn.setAttribute('aria-pressed', btn.dataset.basis===formBasis ? 'true' : 'false');
+    });
+  }
+  function ingVals(x){
+    var k = x.basis==='100g' ? x.amount/100 : x.amount;
+    return { kcal:x.kcal*k, p:x.p*k, c:x.c*k, f:x.f*k };
+  }
+  function servings(){ return num($('#f-serv').value) || 1; }
+  function dishTotal(){ return sum(dishRows.map(ingVals)); }
+  function updateDishTotal(){
+    dishRows.forEach(function(x,i){
+      var el = document.querySelector('[data-ik="'+i+'"]');
+      if(el) el.textContent = r(ingVals(x).kcal)+' ккал';
+    });
+    var t = dishTotal(), s = servings();
+    var h = '';
+    if(dishRows.length){
+      h = 'Уся страва: '+r(t.kcal)+' ккал, '+macroLine(t)+'.';
+      if(s!==1) h += '<br>Одна порція: '+r(t.kcal/s)+' ккал, '+macroLine({p:t.p/s,c:t.c/s,f:t.f/s})+'.';
+    }
+    $('#dish-total').innerHTML = h;
+  }
+  function renderDishRows(){
+    $('#ing-rows').innerHTML = dishRows.length ? dishRows.map(function(x,i){
+      return '<div class="row ing"><div class="rname">'+esc(x.name)+'<small data-ik="'+i+'"></small></div>'
+        + '<input class="amt" type="text" inputmode="decimal" data-ing="'+i+'" value="'+fmt(x.amount)+'" aria-label="Кількість: '+esc(x.name)+'">'
+        + '<span class="unit">'+(x.basis==='100g'?'г':'порц.')+'</span>'
+        + '<button class="del" data-act="deling" data-i="'+i+'" aria-label="Прибрати '+esc(x.name)+'">×</button></div>';
+    }).join('') : '<p class="note" style="margin:0 0 10px">Інгредієнтів ще немає.</p>';
+    updateDishTotal();
+  }
+  function renderIngList(){
+    var box = $('#ing-list');
+    var pool = state.foods.filter(function(x){ return !x.ingredients && x.id!==editId; });
+    var q = $('#ing-search').value.trim().toLowerCase();
+    var list = pool.filter(function(x){ return !q || x.name.toLowerCase().indexOf(q)!==-1; });
+    box.hidden = false;
+    if(!pool.length) box.innerHTML = '<p class="note">Продуктів для інгредієнтів ще немає. Спочатку створи їх як окремі продукти.</p>';
+    else if(!list.length) box.innerHTML = '<p class="note">Нічого не знайдено.</p>';
+    else box.innerHTML = list.map(function(x){ return foodItem(x,'iitem'); }).join('');
+  }
+  function addIng(id){
+    var x = findFood(id);
+    if(!x) return;
+    dishRows.push({ foodId:x.id, name:x.name, amount: x.basis==='100g' ? 100 : 1, basis:x.basis, kcal:x.kcal, p:x.p, c:x.c, f:x.f });
+    $('#ing-search').value = '';
+    $('#ing-list').hidden = true;
+    renderDishRows();
+    var inputs = document.querySelectorAll('#ing-rows .amt');
+    if(inputs.length){ var last = inputs[inputs.length-1]; last.focus(); last.select(); }
+  }
+  /* food: existing product to edit (or null); kind: 'food' | 'dish'; name, vals: prefill from a remote base */
+  function openForm(food, kind, name, vals){
+    editId = food ? food.id : null;
+    armedDel = false;
+    formKind = food ? (food.ingredients ? 'dish' : 'food') : (kind || 'food');
+    var src = food || vals;
+    $('#f-name').value = food ? food.name : (name || '');
+    $('#f-kcal').value = src ? fmt(src.kcal) : '';
+    $('#f-p').value = src ? fmt(src.p) : '';
+    $('#f-c').value = src ? fmt(src.c) : '';
+    $('#f-f').value = src ? fmt(src.f) : '';
+    setBasis(food ? food.basis : '100g');
+    dishRows = [];
+    if(food && food.ingredients){
+      dishRows = food.ingredients.map(function(i){
+        var cur = findFood(i.foodId);
+        var b = (cur && !cur.ingredients) ? cur : i;
+        return { foodId:i.foodId, name:b.name, amount:i.amount, basis:b.basis, kcal:b.kcal, p:b.p, c:b.c, f:b.f };
+      });
+    }
+    $('#f-serv').value = food && food.servings ? fmt(food.servings) : '1';
+    $('#ing-search').value = '';
+    $('#ing-list').hidden = true;
+    $('#prodfields').hidden = formKind!=='food';
+    $('#dishfields').hidden = formKind!=='dish';
+    $('#nf-note').textContent = formKind==='dish' ? NOTE_DISH : (vals ? NOTE_REMOTE : NOTE_FOOD);
+    $('#f-err').textContent = '';
+    $('#f-del').hidden = !food;
+    $('#f-del').textContent = formKind==='dish' ? 'Видалити страву' : 'Видалити продукт';
+    $('#sh-title').textContent = formKind==='dish' ? (food ? 'Змінити страву' : 'Нова страва') : (food ? 'Змінити продукт' : 'Новий продукт');
+    if(formKind==='dish') renderDishRows();
+    only('newform');
+    openOverlay();
+    if(!food && !vals) setTimeout(function(){ $('#f-name').focus(); }, 50);
+  }
 
   /* ---------- external lookup: Open Food Facts + USDA FoodData Central ---------- */
   var OFF_URL = 'https://world.openfoodfacts.org/api/v2/product/';
@@ -474,14 +608,14 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     var kcal = m['208'] || m['957'] || m['958'] || 0;
     if(!kcal && (p||c||fat)) kcal = p*4 + c*4 + fat*9;
     var sub = f.brandOwner || f.brandName || (f.dataType==='Branded' ? '' : 'USDA');
-    return { name: cap(f.description) + ', 100 г', sub: sub, kcal:kcal, p:p, c:c, f:fat, branded: f.dataType==='Branded' };
+    return { name: cap(f.description), sub: sub, kcal:kcal, p:p, c:c, f:fat, branded: f.dataType==='Branded' };
   }
   function fromOff(pr, code){
     var n = pr.nutriments || {};
     var kcal = +n['energy-kcal_100g'] || 0;
     if(!kcal && +n['energy_100g']) kcal = +n['energy_100g'] / 4.184;
     var base = pr.product_name || pr.brands || ('Продукт ' + code);
-    return { name: String(base).trim() + ', 100 г', sub: pr.brands || 'Open Food Facts',
+    return { name: String(base).trim(), sub: pr.brands || 'Open Food Facts',
              kcal:kcal, p:+n['proteins_100g']||0, c:+n['carbohydrates_100g']||0, f:+n['fat_100g']||0 };
   }
 
@@ -494,12 +628,20 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
   function pickRemote(i){
     var x = remote[i];
-    if(x) showNew(x.name, x);
+    if(x) openForm(null, 'food', x.name, x);
   }
 
-  function searchRemote(q){
+  function openRemote(){
     only('remoteview');
+    $('#rem-search').hidden = false;
     $('#sh-title').textContent = 'База USDA';
+    $('#rem-q').value = '';
+    $('#rem-msg').textContent = 'База знає лише англійські назви. Значення подаються на 100 г.';
+    $('#rem-list').innerHTML = '';
+    openOverlay();
+    setTimeout(function(){ $('#rem-q').focus(); }, 50);
+  }
+  function searchRemote(q){
     $('#rem-msg').textContent = 'Шукаю «' + q + '»…';
     $('#rem-list').innerHTML = '';
     var url = FDC_URL + '?query=' + encodeURIComponent(q) + '&pageSize=25&dataType=' + encodeURIComponent('Foundation,SR Legacy,Branded') + '&api_key=' + encodeURIComponent(fdcKey());
@@ -526,6 +668,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function lookupCode(code){
     stopScan();
     only('remoteview');
+    $('#rem-search').hidden = true;
     $('#sh-title').textContent = 'Штрихкод ' + code;
     $('#rem-msg').textContent = 'Шукаю продукт…';
     $('#rem-list').innerHTML = '';
@@ -562,6 +705,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
   function startScan(){
     only('scanview');
+    openOverlay();
     $('#sh-title').textContent = 'Сканер штрихкоду';
     $('#scan-manual').value = '';
     var msg = $('#scan-msg');
@@ -588,26 +732,58 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
 
   function saveFood(){
+    var err = $('#f-err');
     var name = $('#f-name').value.trim();
-    var p = num($('#f-p').value), c = num($('#f-c').value), f = num($('#f-f').value);
-    var kcal = num($('#f-kcal').value);
-    if(!name){ $('#f-err').textContent = 'Вкажи назву.'; return; }
-    if(!kcal && (p||c||f)) kcal = p*4 + c*4 + f*9;
-    if(!kcal){ $('#f-err').textContent = 'Вкажи калорії або хоча б білки, вуглеводи чи жири.'; return; }
-    var found = null;
-    state.foods.forEach(function(x){ if(x.name.toLowerCase()===name.toLowerCase()) found = x; });
-    var item = found || { id:uid() };
+    if(!name){ err.textContent = 'Вкажи назву.'; return; }
+    var dup = state.foods.some(function(x){ return x.id!==editId && x.name.toLowerCase()===name.toLowerCase(); });
+    if(dup){ err.textContent = 'Продукт з такою назвою вже є. Відкрий його зі списку, щоб змінити.'; return; }
+    var kcal, p, c, f;
+    if(formKind==='dish'){
+      if(!dishRows.length){ err.textContent = 'Додай хоча б один інгредієнт.'; return; }
+      if(dishRows.some(function(x){ return !(x.amount>0); })){ err.textContent = 'Вкажи кількість для кожного інгредієнта.'; return; }
+      var t = dishTotal(), s = servings();
+      kcal = t.kcal/s; p = t.p/s; c = t.c/s; f = t.f/s;
+      if(!kcal){ err.textContent = 'У страві виходить 0 ккал. Перевір інгредієнти.'; return; }
+    } else {
+      p = num($('#f-p').value); c = num($('#f-c').value); f = num($('#f-f').value);
+      kcal = num($('#f-kcal').value);
+      if(!kcal && (p||c||f)) kcal = p*4 + c*4 + f*9;
+      if(!kcal){ err.textContent = 'Вкажи калорії або хоча б білки, вуглеводи чи жири.'; return; }
+    }
+    var item = (editId && findFood(editId)) || { id:uid() };
+    var isNew = !findFood(item.id);
     item.name = name; item.kcal = kcal; item.p = p; item.c = c; item.f = f;
-    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==item.id; }));
-    save();
-    $('#f-search').value = name;
-    showPick();
+    if(formKind==='dish'){
+      item.basis = 'portion';
+      item.servings = servings();
+      item.ingredients = dishRows.map(function(x){
+        return { foodId:x.foodId, name:x.name, amount:x.amount, basis:x.basis, kcal:x.kcal, p:x.p, c:x.c, f:x.f };
+      });
+    } else {
+      item.basis = formBasis;
+      delete item.ingredients; delete item.servings;
+      /* dishes that use this product follow its new values */
+      state.foods.forEach(function(d){
+        if(!d.ingredients) return;
+        var hit = false;
+        d.ingredients.forEach(function(i){
+          if(i.foodId===item.id){ hit = true; i.name = name; i.basis = item.basis; i.kcal = kcal; i.p = p; i.c = c; i.f = f; }
+        });
+        if(hit){
+          var dt = sum(d.ingredients.map(ingVals)), ds = d.servings>0 ? d.servings : 1;
+          d.kcal = dt.kcal/ds; d.p = dt.p/ds; d.c = dt.c/ds; d.f = dt.f/ds;
+        }
+      });
+    }
+    if(isNew) state.foods = [item].concat(state.foods);
+    save(); closeSheet(); render();
   }
   function addFood(id){
-    var item = null;
-    state.foods.forEach(function(x){ if(x.id===id) item = x; });
+    var item = findFood(id);
     if(!item) return;
-    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:item.name, kcal:item.kcal, p:item.p, c:item.c, f:item.f });
+    var name = item.name;
+    if(item.basis==='100g' && !/100\s*г\s*$/i.test(name)) name += ', 100 г';
+    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:item.kcal, p:item.p, c:item.c, f:item.f });
     state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==id; }));
     save(); closeSheet(); render();
   }
@@ -618,26 +794,34 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     var tab = t.closest('.tab');
     if(tab){ view = tab.dataset.view; armedReset=false; render(); window.scrollTo(0,0); return; }
 
-    var pit = t.closest('.pitem:not(.ritem)');
-    if(pit){ addFood(pit.dataset.id); return; }
-    if(t.id==='f-new'){ showNew($('#f-search').value.trim()); return; }
-    if(t.id==='f-scan'){ startScan(); return; }
-    if(t.id==='f-remote'){
-      var q = $('#f-search').value.trim();
-      if(!q){ $('#plist').innerHTML = '<p class="note">Введи назву англійською в полі пошуку, наприклад chicken breast, і натисни «Шукати в базі USDA».</p>'; return; }
-      searchRemote(q); return;
+    var it = t.closest('.pitem');
+    if(it){
+      if(it.classList.contains('aitem')) addFood(it.dataset.id);
+      else if(it.classList.contains('fitem')) openForm(findFood(it.dataset.id));
+      else if(it.classList.contains('iitem')) addIng(it.dataset.id);
+      else if(it.classList.contains('ritem')) pickRemote(+it.dataset.i);
+      return;
     }
-    if(t.id==='scan-back' || t.id==='rem-back'){ stopScan(); showPick(); return; }
+    var bs = t.closest('#f-basis button');
+    if(bs){ setBasis(bs.dataset.basis); return; }
+    if(t.id==='f-goto'){ closeSheet(); view = 'foods'; render(); window.scrollTo(0,0); return; }
     if(t.id==='scan-go'){
       var digits = $('#scan-manual').value.replace(/\D/g,'');
       if(digits.length<8){ $('#scan-msg').textContent = 'Штрихкод має містити щонайменше 8 цифр.'; return; }
       lookupCode(digits); return;
     }
-    var rit = t.closest('.ritem');
-    if(rit){ pickRemote(+rit.dataset.i); return; }
-    if(t.id==='f-back'){ showPick(); return; }
+    if(t.id==='rem-go'){
+      var q = $('#rem-q').value.trim();
+      if(!q){ $('#rem-msg').textContent = 'Введи назву англійською, наприклад chicken breast.'; return; }
+      searchRemote(q); return;
+    }
     if(t.id==='f-save'){ saveFood(); return; }
-    if(t.id==='f-cancel' || t.id==='overlay'){ closeSheet(); return; }
+    if(t.id==='f-del'){
+      if(!armedDel){ armedDel = true; t.textContent = 'Точно видалити?'; return; }
+      state.foods = state.foods.filter(function(x){ return x.id!==editId; });
+      save(); closeSheet(); render(); return;
+    }
+    if(t.id==='f-cancel' || t.id==='scan-back' || t.id==='rem-back' || t.id==='f-back' || t.id==='overlay'){ closeSheet(); return; }
 
     var b = t.closest('[data-act]');
     if(!b) return;
@@ -645,10 +829,11 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(act==='prev'){ day = shift(day,-1); render(); }
     else if(act==='next'){ if(day<iso(new Date())){ day = shift(day,1); render(); } }
     else if(act==='add'){ openSheet(b.dataset.meal); }
-    else if(act==='delfood'){
-      state.foods = state.foods.filter(function(x){ return x.id!==b.dataset.id; });
-      save(); render();
-    }
+    else if(act==='newfood'){ openForm(null, 'food'); }
+    else if(act==='newdish'){ openForm(null, 'dish'); }
+    else if(act==='scan'){ startScan(); }
+    else if(act==='remote'){ openRemote(); }
+    else if(act==='deling'){ dishRows.splice(+b.dataset.i, 1); renderDishRows(); }
     else if(act==='del'){
       state.entries = state.entries.filter(function(e){ return e.id!==b.dataset.id; });
       save(); render();
@@ -660,7 +845,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       ta.select();
       var ok = false;
       try{ ok = document.execCommand('copy'); }catch(e){}
-      if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(ta.value); ok = true; }catch(e){} }
+      if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(ta.value).catch(function(){}); ok = true; }catch(e){} }
       msg.textContent = ok ? 'Скопійовано. Встав текст у нотатки.' : 'Текст виділено, скопіюй його вручну.';
     }
     else if(act==='import'){
@@ -694,12 +879,29 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     }
   });
 
-  document.addEventListener('keydown', function(ev){
-    if(ev.key==='Escape') closeSheet();
-    if(ev.key==='Enter' && !$('#newform').hidden && ev.target.tagName==='INPUT'){ saveFood(); }
+  document.addEventListener('input', function(ev){
+    var t = ev.target;
+    if(t.id==='f-search') renderPick();
+    else if(t.id==='food-q'){ foodQuery = t.value; $('#foodlist').innerHTML = foodListHTML(); }
+    else if(t.id==='ing-search') renderIngList();
+    else if(t.id==='f-serv') updateDishTotal();
+    else if(t.dataset && t.dataset.ing!==undefined){
+      var row = dishRows[+t.dataset.ing];
+      if(row){ row.amount = num(t.value); updateDishTotal(); }
+    }
+  });
+  document.addEventListener('focusin', function(ev){
+    if(ev.target.id==='ing-search') renderIngList();
   });
 
-  $('#f-search').addEventListener('input', renderPick);
+  document.addEventListener('keydown', function(ev){
+    if(ev.key==='Escape'){ closeSheet(); return; }
+    if(ev.key!=='Enter' || ev.target.tagName!=='INPUT') return;
+    var id = ev.target.id;
+    if(id==='rem-q'){ $('#rem-go').click(); }
+    else if(id==='scan-manual'){ $('#scan-go').click(); }
+    else if(!$('#newform').hidden && id!=='ing-search' && $('#overlay').classList.contains('open')){ saveFood(); }
+  });
 
   load();
   recalc();
