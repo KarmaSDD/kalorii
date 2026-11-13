@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Калорії</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Калорії">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --ink:#101828; --muted:#667085; --line:#E4E7EC;
+  --accent:#2F4BFF; --accent-ink:#FFFFFF; --track:#E4E7EC; --warn:#E5484D;
+  --p:#E5484D; --c:#F5A524; --f:#17A398;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1116; --surface:#171B22; --ink:#F2F4F7; --muted:#98A2B3; --line:#262C36;
+    --accent:#7C8CFF; --accent-ink:#0E1116; --track:#262C36; --warn:#FF6B70;
+    --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1116; --surface:#171B22; --ink:#F2F4F7; --muted:#98A2B3; --line:#262C36;
+  --accent:#7C8CFF; --accent-ink:#0E1116; --track:#262C36; --warn:#FF6B70;
+  --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding:12px 16px 120px}
+
+/* day header */
+.dayhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 16px}
+.dayhead h1{font-size:18px;font-weight:600;margin:0;text-align:center;flex:1;text-transform:capitalize}
+.dayhead small{display:block;color:var(--muted);font-weight:400;font-size:13px;text-transform:none}
+.navbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1}
+.navbtn[disabled]{opacity:.35;cursor:default}
+
+/* ring */
+.hero{background:var(--surface);border-radius:28px;padding:20px 16px 18px;margin-bottom:12px}
+.ringwrap{position:relative;width:220px;height:220px;margin:0 auto}
+.ringwrap svg{width:100%;height:100%;display:block}
+.ring-track{fill:none;stroke:var(--track);stroke-width:14}
+.ring-bar{fill:none;stroke:var(--accent);stroke-width:14;stroke-linecap:round}
+.ring-bar.over{stroke:var(--warn)}
+.ringcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.bignum{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;font-size:44px;letter-spacing:-.02em;line-height:1}
+.bignum.over{color:var(--warn)}
+.ringcenter span{color:var(--muted);font-size:14px;margin-top:6px}
+.ringsub{display:flex;justify-content:center;gap:28px;margin-top:14px;color:var(--muted);font-size:14px}
+.ringsub b{display:block;color:var(--ink);font-size:17px;font-weight:600}
+.ringsub div{text-align:center}
+
+/* macros */
+.macros{background:var(--surface);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:grid;gap:12px}
+.mac .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.mac .top span:last-child{color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:4px}
+
+/* meals */
+.meal{background:var(--surface);border-radius:20px;padding:6px 16px 10px;margin-bottom:12px}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0 4px}
+.mhead h2{margin:0;font-size:16px;font-weight:600}
+.mhead span{color:var(--muted);font-size:14px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.rname{flex:1;min-width:0;font-weight:500;overflow-wrap:anywhere}
+.rname small{display:block;color:var(--muted);font-weight:400;font-size:13px}
+.rk{font-weight:600;white-space:nowrap}
+.del{width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1}
+.addbtn{width:100%;margin-top:6px;padding:10px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--accent);font-weight:600}
+
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgba(10,12,16,.5);display:none;align-items:flex-end;z-index:20}
+.overlay.open{display:flex}
+.sheet{width:100%;max-width:480px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto}
+.sheet h3{margin:0 0 12px;font-size:18px}
+[hidden]{display:none!important}
+.field{display:block;margin-bottom:10px}
+.field span{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.field input{width:100%;font-size:16px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vidwrap{border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;margin-bottom:10px}
+.vidwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.srcrow{display:flex;gap:8px;margin:0 0 10px}
+.srcrow button{flex:1;border:1px solid var(--line);background:var(--bg);padding:11px 6px;border-radius:12px;font-weight:500;font-size:15px}
+.plist{max-height:42vh;overflow:auto;margin-bottom:10px}
+.pitem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:12px 2px}
+.pitem:first-child{border-top:0}
+.pn{flex:1;min-width:0;font-weight:500;overflow-wrap:anywhere}
+.pn small{display:block;color:var(--muted);font-weight:400;font-size:13px}
+.pk{font-weight:600;white-space:nowrap}
+.primary{width:100%;border:0;background:var(--accent);color:var(--accent-ink);padding:14px;border-radius:14px;font-weight:600;font-size:16px;margin-top:6px}
+.ghost{width:100%;border:0;background:transparent;color:var(--muted);padding:12px;font-size:15px}
+.err{color:var(--warn);font-size:14px;min-height:20px;margin:0 0 4px}
+
+/* tabs */
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,0px);z-index:10}
+.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tab{border:0;background:transparent;padding:12px 4px;border-radius:12px;font-weight:500;color:var(--muted)}
+.tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg)}
+
+/* week */
+.panel{background:var(--surface);border-radius:20px;padding:16px;margin-bottom:12px}
+.panel h2{margin:0 0 10px;font-size:16px;font-weight:600}
+.chart{width:100%;height:auto;display:block}
+.chart .tx{fill:var(--muted);font-size:11px;font-family:'Onest',system-ui,sans-serif}
+.chart .gl{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.chart .b{fill:var(--accent)}
+.chart .b.over{fill:var(--warn)}
+.chart .b.zero{fill:var(--track)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat b{display:block;font-family:'Unbounded',system-ui,sans-serif;font-size:22px;font-weight:500}
+.stat span{color:var(--muted);font-size:13px}
+.daylist .row:first-child{border-top:0}
+.daylist button.rname{border:0;background:transparent;text-align:left;padding:0}
+
+/* settings */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-family:ui-monospace,Menlo,monospace}
+.btnrow{display:flex;gap:8px;margin-top:8px}
+.btnrow button{flex:1;border:1px solid var(--line);background:var(--bg);padding:11px;border-radius:12px;font-weight:500}
+.btnrow .danger{color:var(--warn)}
+.note{color:var(--muted);font-size:13px;margin:8px 0 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main id="main"></main>
+</div>
+
+<nav class="tabbar" aria-label="Розділи">
+  <div>
+    <button class="tab" data-view="today">Сьогодні</button>
+    <button class="tab" data-view="week">Тиждень</button>
+    <button class="tab" data-view="settings">Ціль</button>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Додати їжу">
+  <div class="sheet">
+    <h3 id="sh-title">Що ти з’їв?</h3>
+    <div id="pick">
+      <label class="field"><span>Пошук серед збережених</span><input id="f-search" type="text" autocomplete="off" placeholder="Почни вводити назву"></label>
+      <div class="srcrow">
+        <button id="f-scan">Сканувати штрихкод</button>
+        <button id="f-remote">Шукати в базі USDA</button>
+      </div>
+      <div class="plist" id="plist"></div>
+      <button class="primary" id="f-new">Нова страва або продукт</button>
+      <button class="ghost" id="f-cancel">Закрити</button>
+    </div>
+    <div id="scanview" hidden>
+      <div class="vidwrap"><video id="scan-video" playsinline muted></video></div>
+      <p class="note" id="scan-msg" role="status">Наведи камеру на штрихкод.</p>
+      <label class="field"><span>Або введи цифри штрихкоду</span><input id="scan-manual" type="text" inputmode="numeric" placeholder="Наприклад, 5449000000996"></label>
+      <button class="primary" id="scan-go">Знайти за цифрами</button>
+      <button class="ghost" id="scan-back">Назад до списку</button>
+    </div>
+    <div id="remoteview" hidden>
+      <p class="note" id="rem-msg" role="status" style="margin-top:0"></p>
+      <div class="plist" id="rem-list"></div>
+      <button class="ghost" id="rem-back">Назад до списку</button>
+    </div>
+    <div id="newform" hidden>
+      <p class="note" id="nf-note" style="margin:0 0 10px">Це потрібно зробити один раз. Вкажи значення на одну порцію, наприклад «Гречка, 100 г». Якщо така назва вже є, її значення оновляться.</p>
+      <label class="field"><span>Назва</span><input id="f-name" type="text" autocomplete="off" placeholder="Наприклад, гречка з куркою"></label>
+      <label class="field"><span>Калорії, ккал</span><input id="f-kcal" type="text" inputmode="decimal" placeholder="Можна лишити порожнім, якщо вказати БЖВ"></label>
+      <div class="grid3">
+        <label class="field"><span>Білки, г</span><input id="f-p" type="text" inputmode="decimal"></label>
+        <label class="field"><span>Вуглеводи, г</span><input id="f-c" type="text" inputmode="decimal"></label>
+        <label class="field"><span>Жири, г</span><input id="f-f" type="text" inputmode="decimal"></label>
+      </div>
+      <p class="err" id="f-err"></p>
+      <button class="primary" id="f-save">Зберегти в список</button>
+      <button class="ghost" id="f-back">Назад до списку</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY = 'kalorii:v1';
+  var state = { goal:{kcal:2000,p:120,c:220,f:65,weight:0}, entries:[], foods:[], usdaKey:'' };
+  var storageOk = true;
+  var view = 'today';
+  var day = iso(new Date());
+  var MEALS = [['breakfast','Сніданок'],['lunch','Обід'],['dinner','Вечеря'],['snack','Перекус']];
+  var sheetMeal = 'breakfast';
+  var armedReset = false;
+  function mealKey(k){ return MEALS.some(function(m){ return m[0]===k; }) ? k : 'other'; }
+  function mealName(k){ var n = 'Без прийому'; MEALS.forEach(function(m){ if(m[0]===k) n = m[1]; }); return n; }
+
+  function $(s){ return document.querySelector(s); }
+  function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function parseIso(s){ var a=s.split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
+  function shift(s, n){ var d=parseIso(s); d.setDate(d.getDate()+n); return iso(d); }
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function num(v){ var n=parseFloat(String(v).replace(',','.')); return isFinite(n)&&n>0?n:0; }
+  function r(n){ return Math.round(n); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+  function foodsFrom(s){
+    var list = Array.isArray(s.foods) ? s.foods : (Array.isArray(s.recent) ? s.recent : []);
+    return list.filter(function(x){ return x && x.name; }).map(function(x){
+      return { id:x.id||uid(), name:String(x.name), kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
+    });
+  }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){
+        var s = JSON.parse(raw);
+        if(s && Array.isArray(s.entries)){
+          state.entries = s.entries;
+          state.foods = foodsFrom(s);
+          state.usdaKey = typeof s.usdaKey === 'string' ? s.usdaKey : '';
+          state.goal = Object.assign({}, state.goal, s.goal||{});
+        }
+      }
+    }catch(e){ storageOk = false; }
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+    catch(e){ storageOk = false; }
+  }
+
+  function recalc(){
+    var g = state.goal;
+    if(g.weight>0){
+      g.p = g.weight*2;
+      g.f = g.weight*1;
+      g.c = Math.max((g.kcal - g.p*4 - g.f*9)/4, 0);
+    }
+  }
+  function calcHTML(){
+    var g = state.goal;
+    if(!(g.weight>0)) return '<p class="note" style="margin:0">Вкажи вагу, і норму білків, жирів та вуглеводів буде розраховано автоматично.</p>';
+    var h = '<div class="row" style="border-top:0"><div class="rname">Білки<small>2 г на кг</small></div><div class="rk">'+r(g.p)+' г</div></div>'
+      + '<div class="row"><div class="rname">Жири<small>1 г на кг</small></div><div class="rk">'+r(g.f)+' г</div></div>'
+      + '<div class="row"><div class="rname">Вуглеводи<small>решта калорій</small></div><div class="rk">'+r(g.c)+' г</div></div>';
+    if(g.kcal < g.p*4 + g.f*9) h += '<p class="err" style="margin-top:10px">Калорій замало: білки й жири для цієї ваги вже дають '+r(g.p*4+g.f*9)+' ккал. Збільш денну ціль.</p>';
+    return h;
+  }
+
+  function sum(list){
+    var t={kcal:0,p:0,c:0,f:0};
+    list.forEach(function(e){ t.kcal+=e.kcal; t.p+=e.p; t.c+=e.c; t.f+=e.f; });
+    return t;
+  }
+  function dayEntries(d){ return state.entries.filter(function(e){ return e.date===d; }); }
+
+  function dayLabel(d){
+    var today = iso(new Date());
+    var long = parseIso(d).toLocaleDateString('uk-UA',{weekday:'long', day:'numeric', month:'long'});
+    if(d===today) return 'Сьогодні<small>'+esc(long)+'</small>';
+    if(d===shift(today,-1)) return 'Вчора<small>'+esc(long)+'</small>';
+    return esc(long);
+  }
+
+  /* ---------- views ---------- */
+  function todayHTML(){
+    var es = dayEntries(day), t = sum(es), g = state.goal;
+    var left = g.kcal - t.kcal, over = left < 0;
+    var pct = g.kcal>0 ? Math.min(t.kcal/g.kcal, 1) : 0;
+    var C = 2*Math.PI*88;
+    var today = iso(new Date());
+
+    var h = '<div class="dayhead">'
+      + '<button class="navbtn" data-act="prev" aria-label="Попередній день">‹</button>'
+      + '<h1>'+dayLabel(day)+'</h1>'
+      + '<button class="navbtn" data-act="next" aria-label="Наступний день"'+(day>=today?' disabled':'')+'>›</button>'
+      + '</div>';
+
+    h += '<section class="hero" aria-label="Калорії за день">'
+      + '<div class="ringwrap"><svg viewBox="0 0 200 200" aria-hidden="true">'
+      + '<circle class="ring-track" cx="100" cy="100" r="88"/>'
+      + '<circle class="ring-bar'+(over?' over':'')+'" cx="100" cy="100" r="88" transform="rotate(-90 100 100)" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pct)).toFixed(1)+'"/>'
+      + '</svg><div class="ringcenter"><div class="bignum'+(over?' over':'')+'">'+Math.abs(r(left))+'</div><span>'+(over?'ккал понад ціль':'ккал залишилось')+'</span></div></div>'
+      + '<div class="ringsub"><div><b>'+r(t.kcal)+'</b>з’їдено</div><div><b>'+r(g.kcal)+'</b>ціль</div></div>'
+      + '</section>';
+
+    function mac(label, val, goal, color){
+      var w = goal>0 ? Math.min(val/goal*100,100) : 0;
+      return '<div class="mac"><div class="top"><span>'+label+'</span><span>'+r(val)+' / '+r(goal)+' г</span></div>'
+        + '<div class="bar"><i style="width:'+w.toFixed(1)+'%;background:'+color+'"></i></div></div>';
+    }
+    h += '<section class="macros" aria-label="Білки, вуглеводи, жири">'
+      + mac('Білки', t.p, g.p, 'var(--p)') + mac('Вуглеводи', t.c, g.c, 'var(--c)') + mac('Жири', t.f, g.f, 'var(--f)')
+      + '</section>';
+
+    var groups = MEALS.slice();
+    if(es.some(function(e){ return mealKey(e.meal)==='other'; })) groups.push(['other','Без прийому']);
+    groups.forEach(function(m){
+      var list = es.filter(function(e){ return mealKey(e.meal)===m[0]; });
+      var k = sum(list).kcal;
+      h += '<section class="meal"><div class="mhead"><h2>'+m[1]+'</h2><span>'+(list.length? r(k)+' ккал' : '')+'</span></div>';
+      list.forEach(function(e){
+        h += '<div class="row"><div class="rname">'+esc(e.name)
+          + '<small>Б '+r(e.p)+' г, В '+r(e.c)+' г, Ж '+r(e.f)+' г</small></div>'
+          + '<div class="rk">'+r(e.kcal)+'</div>'
+          + '<button class="del" data-act="del" data-id="'+esc(e.id)+'" aria-label="Видалити '+esc(e.name)+'">×</button></div>';
+      });
+      if(m[0]!=='other') h += '<button class="addbtn" data-act="add" data-meal="'+m[0]+'">Додати в «'+m[1].toLowerCase()+'»</button>';
+      h += '</section>';
+    });
+    return h;
+  }
+
+  function weekHTML(){
+    var today = iso(new Date()), g = state.goal;
+    var days = [];
+    for(var i=6;i>=0;i--){ var d = shift(today,-i); days.push({d:d, t:sum(dayEntries(d))}); }
+    var max = Math.max(g.kcal*1.15, Math.max.apply(null, days.map(function(x){return x.t.kcal;})), 1);
+    var W=320, H=180, base=146, top=22, bw=30, step=(W-16)/7;
+    var svg = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Калорії за останні 7 днів">';
+    var gy = base - g.kcal/max*(base-top);
+    svg += '<line class="gl" x1="4" x2="'+(W-4)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'"/>';
+    svg += '<text class="tx" x="'+(W-4)+'" y="'+(gy-5).toFixed(1)+'" text-anchor="end">ціль '+r(g.kcal)+'</text>';
+    days.forEach(function(x,i){
+      var cx = 8 + step*i + step/2;
+      var h = x.t.kcal/max*(base-top);
+      var cls = x.t.kcal===0 ? 'b zero' : (x.t.kcal>g.kcal ? 'b over' : 'b');
+      var bh = x.t.kcal===0 ? 3 : Math.max(h,3);
+      svg += '<rect class="'+cls+'" x="'+(cx-bw/2).toFixed(1)+'" y="'+(base-bh).toFixed(1)+'" width="'+bw+'" height="'+bh.toFixed(1)+'" rx="6"/>';
+      if(x.t.kcal>0) svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base-bh-5).toFixed(1)+'" text-anchor="middle">'+r(x.t.kcal)+'</text>';
+      var wd = parseIso(x.d).toLocaleDateString('uk-UA',{weekday:'short'});
+      svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base+18)+'" text-anchor="middle">'+esc(wd)+'</text>';
+    });
+    svg += '</svg>';
+
+    var logged = days.filter(function(x){ return x.t.kcal>0; });
+    var avg = logged.length ? logged.reduce(function(a,x){return a+x.t.kcal;},0)/logged.length : 0;
+    var inGoal = logged.filter(function(x){ return x.t.kcal<=g.kcal; }).length;
+
+    var h = '<div class="dayhead"><h1>Останні 7 днів</h1></div>';
+    h += '<section class="panel">'+svg+'</section>';
+    h += '<section class="panel"><div class="stats">'
+      + '<div class="stat"><b>'+(logged.length? r(avg) : '—')+'</b><span>середнє за дні із записами, ккал</span></div>'
+      + '<div class="stat"><b>'+inGoal+' з '+logged.length+'</b><span>днів у межах цілі</span></div>'
+      + '</div></section>';
+    h += '<section class="panel daylist"><h2>По днях</h2>';
+    days.slice().reverse().forEach(function(x){
+      var label = parseIso(x.d).toLocaleDateString('uk-UA',{weekday:'long', day:'numeric', month:'long'});
+      h += '<div class="row"><button class="rname" data-act="goto" data-day="'+x.d+'">'+esc(label)+'</button><div class="rk">'+(x.t.kcal? r(x.t.kcal)+' ккал' : '—')+'</div></div>';
+    });
+    h += '</section>';
+    return h;
+  }
+
+  function settingsHTML(){
+    var g = state.goal;
+    function inp(key,label,val){ return '<label class="field"><span>'+label+'</span><input type="text" inputmode="decimal" data-goal="'+key+'" value="'+val+'"></label>'; }
+    var h = '<div class="dayhead"><h1>Ціль і дані</h1></div>';
+    h += '<section class="panel"><h2>Денна ціль</h2><div class="sgrid">'
+      + inp('weight','Вага, кг', g.weight>0 ? g.weight : '') + inp('kcal','Калорії, ккал', r(g.kcal))
+      + '</div><p class="note">2 г білка і 1 г жиру на кг ваги, решта калорій іде у вуглеводи. Зміни зберігаються одразу.</p></section>'
+      + '<section class="panel"><h2>Норма БЖВ</h2><div id="calc">'+calcHTML()+'</div></section>';
+    h += foodsHTML();
+    h += '<section class="panel"><h2>База продуктів USDA</h2>'
+      + '<label class="field"><span>Власний ключ API (необов’язково)</span><input type="text" id="usda-key" data-usda="1" autocomplete="off" autocapitalize="off" value="'+esc(state.usdaKey||'')+'"></label>'
+      + '<p class="note" style="margin:0">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup.</p></section>';
+    h += '<section class="panel"><h2>Резервна копія</h2>'
+      + '<p class="note" style="margin-top:0">Дані лежать лише в цьому браузері. Скопіюй їх і збережи в нотатках, щоб не втратити.</p>'
+      + '<textarea id="io" spellcheck="false" aria-label="Дані у форматі JSON"></textarea>'
+      + '<div class="btnrow"><button data-act="export">Показати й скопіювати</button><button data-act="import">Відновити з тексту</button></div>'
+      + '<p class="note" id="iomsg" role="status"></p>'
+      + '<div class="btnrow"><button class="danger" data-act="reset">'+(armedReset?'Точно видалити все?':'Видалити всі записи')+'</button></div>'
+      + '</section>';
+    if(!storageOk) h += '<p class="err">Браузер не дозволяє зберігати дані, тому після закриття вони зникнуть.</p>';
+    return h;
+  }
+
+  function render(){
+    document.querySelectorAll('.tab').forEach(function(b){
+      b.setAttribute('aria-current', b.dataset.view===view ? 'page' : 'false');
+    });
+    var m = $('#main');
+    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : settingsHTML();
+  }
+
+  /* ---------- sheet ---------- */
+  function foodsHTML(){
+    var h = '<section class="panel"><h2>Збережені продукти</h2>';
+    if(!state.foods.length) h += '<p class="note" style="margin:0">Список порожній. Додай першу страву через «Додати їжу» на вкладці «Сьогодні».</p>';
+    state.foods.forEach(function(x,i){
+      h += '<div class="row"'+(i===0?' style="border-top:0"':'')+'><div class="rname">'+esc(x.name)
+        + '<small>'+r(x.kcal)+' ккал, Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г</small></div>'
+        + '<button class="del" data-act="delfood" data-id="'+esc(x.id)+'" aria-label="Видалити '+esc(x.name)+' зі списку">×</button></div>';
+    });
+    return h + '</section>';
+  }
+  function renderPick(){
+    var raw = $('#f-search').value.trim(), q = raw.toLowerCase();
+    var list = state.foods.filter(function(x){ return !q || x.name.toLowerCase().indexOf(q)!==-1; });
+    var box = $('#plist');
+    if(!state.foods.length){
+      box.innerHTML = '<p class="note">Збережених продуктів ще немає. Створи першу страву нижче.</p>';
+    } else if(!list.length){
+      box.innerHTML = '<p class="note">Нічого не знайдено. Можна створити «'+esc(raw)+'» як нову страву.</p>';
+    } else {
+      box.innerHTML = list.map(function(x){
+        return '<button class="pitem" data-id="'+esc(x.id)+'"><span class="pn">'+esc(x.name)
+          + '<small>Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г</small></span><span class="pk">'+r(x.kcal)+' ккал</span></button>';
+      }).join('');
+    }
+  }
+  var VIEWS = ['pick','scanview','remoteview','newform'];
+  function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
+  function showPick(){
+    only('pick');
+    $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
+    renderPick();
+  }
+  var NF_NOTE = 'Це потрібно зробити один раз. Вкажи значення на одну порцію, наприклад «Гречка, 100 г». Якщо така назва вже є, її значення оновляться.';
+  var NF_NOTE_REMOTE = 'Значення з бази на 100 г. Перевір їх, за потреби зміни назву чи цифри (наприклад, на свою порцію) і збережи.';
+  function showNew(name, vals){
+    ['#f-kcal','#f-p','#f-c','#f-f'].forEach(function(s){ $(s).value=''; });
+    $('#nf-note').textContent = vals ? NF_NOTE_REMOTE : NF_NOTE;
+    if(vals){
+      $('#f-kcal').value = r(vals.kcal);
+      $('#f-p').value = vals.p ? Math.round(vals.p*10)/10 : '';
+      $('#f-c').value = vals.c ? Math.round(vals.c*10)/10 : '';
+      $('#f-f').value = vals.f ? Math.round(vals.f*10)/10 : '';
+    }
+    $('#f-name').value = name || '';
+    $('#f-err').textContent = '';
+    only('newform');
+    $('#sh-title').textContent = 'Нова страва або продукт';
+    if(!vals) setTimeout(function(){ (name ? $('#f-kcal') : $('#f-name')).focus(); }, 50);
+  }
+  function openSheet(meal){
+    sheetMeal = mealKey(meal)==='other' ? 'snack' : meal;
+    $('#f-search').value = '';
+    showPick();
+    $('#overlay').classList.add('open');
+    if(state.foods.length) setTimeout(function(){ $('#f-search').focus(); }, 50);
+  }
+  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); }
+
+  /* ---------- external lookup: Open Food Facts + USDA FoodData Central ---------- */
+  var OFF_URL = 'https://world.openfoodfacts.org/api/v2/product/';
+  var FDC_URL = 'https://api.nal.usda.gov/fdc/v1/foods/search';
+  var ZX_URL = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+  var remote = [];
+  var scanner = null;
+
+  function fdcKey(){ return state.usdaKey || 'DEMO_KEY'; }
+  function cap(s){ s = String(s||'').trim().toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function stripZeros(s){ return String(s).replace(/^0+/, ''); }
+
+  function fromFdc(f){
+    var m = {};
+    (f.foodNutrients||[]).forEach(function(n){
+      var k = String(n.nutrientNumber||'');
+      if(m[k]===undefined) m[k] = +n.value || 0;
+    });
+    var p = m['203']||0, c = m['205']||0, fat = m['204']||0;
+    var kcal = m['208'] || m['957'] || m['958'] || 0;
+    if(!kcal && (p||c||fat)) kcal = p*4 + c*4 + fat*9;
+    var sub = f.brandOwner || f.brandName || (f.dataType==='Branded' ? '' : 'USDA');
+    return { name: cap(f.description) + ', 100 г', sub: sub, kcal:kcal, p:p, c:c, f:fat, branded: f.dataType==='Branded' };
+  }
+  function fromOff(pr, code){
+    var n = pr.nutriments || {};
+    var kcal = +n['energy-kcal_100g'] || 0;
+    if(!kcal && +n['energy_100g']) kcal = +n['energy_100g'] / 4.184;
+    var base = pr.product_name || pr.brands || ('Продукт ' + code);
+    return { name: String(base).trim() + ', 100 г', sub: pr.brands || 'Open Food Facts',
+             kcal:kcal, p:+n['proteins_100g']||0, c:+n['carbohydrates_100g']||0, f:+n['fat_100g']||0 };
+  }
+
+  function renderRemote(){
+    var box = $('#rem-list');
+    box.innerHTML = remote.map(function(x,i){
+      return '<button class="pitem ritem" data-i="'+i+'"><span class="pn">'+esc(x.name)
+        + '<small>'+(x.sub? esc(x.sub)+'. ' : '')+'Б '+r(x.p)+' г, В '+r(x.c)+' г, Ж '+r(x.f)+' г</small></span><span class="pk">'+r(x.kcal)+' ккал</span></button>';
+    }).join('');
+  }
+  function pickRemote(i){
+    var x = remote[i];
+    if(x) showNew(x.name, x);
+  }
+
+  function searchRemote(q){
+    only('remoteview');
+    $('#sh-title').textContent = 'База USDA';
+    $('#rem-msg').textContent = 'Шукаю «' + q + '»…';
+    $('#rem-list').innerHTML = '';
+    var url = FDC_URL + '?query=' + encodeURIComponent(q) + '&pageSize=25&dataType=' + encodeURIComponent('Foundation,SR Legacy,Branded') + '&api_key=' + encodeURIComponent(fdcKey());
+    fetch(url).then(function(res){
+      if(res.status===429) throw new Error('limit');
+      if(!res.ok) throw new Error('http');
+      return res.json();
+    }).then(function(j){
+      remote = (j.foods||[]).map(fromFdc).filter(function(x){ return x.kcal>0; });
+      remote.sort(function(a,b){ return (a.branded?1:0) - (b.branded?1:0); });
+      if(!remote.length){
+        $('#rem-msg').textContent = 'Нічого не знайдено. База USDA знає лише англійські назви, наприклад chicken breast або oatmeal.';
+      } else {
+        $('#rem-msg').textContent = 'Обери продукт: значення подано на 100 г.';
+        renderRemote();
+      }
+    }).catch(function(e){
+      $('#rem-msg').textContent = e.message==='limit'
+        ? 'Ліміт загального ключа вичерпано. Додай власний безкоштовний ключ USDA у вкладці «Ціль».'
+        : 'Не вдалося звернутися до бази. Перевір інтернет і спробуй ще раз.';
+    });
+  }
+
+  function lookupCode(code){
+    stopScan();
+    only('remoteview');
+    $('#sh-title').textContent = 'Штрихкод ' + code;
+    $('#rem-msg').textContent = 'Шукаю продукт…';
+    $('#rem-list').innerHTML = '';
+    fetch(OFF_URL + encodeURIComponent(code) + '.json?fields=product_name,brands,nutriments')
+      .then(function(res){ return res.ok ? res.json() : { status:0 }; })
+      .catch(function(){ return { status:0 }; })
+      .then(function(j){
+        var it = (j && j.status===1 && j.product) ? fromOff(j.product, code) : null;
+        if(it && it.kcal>0) return [it];
+        var url = FDC_URL + '?query=' + encodeURIComponent(code) + '&pageSize=10&dataType=Branded&api_key=' + encodeURIComponent(fdcKey());
+        return fetch(url).then(function(res){ return res.ok ? res.json() : { foods:[] }; })
+          .then(function(j2){
+            return (j2.foods||[]).filter(function(f){ return stripZeros(f.gtinUpc||'')===stripZeros(code); }).map(fromFdc);
+          }).catch(function(){ return []; });
+      })
+      .then(function(list){
+        remote = list.filter(function(x){ return x.kcal>0; });
+        if(remote.length){
+          pickRemote(0);
+        } else {
+          $('#rem-msg').textContent = 'Продукт зі штрихкодом ' + code + ' не знайдено в базах. Спробуй пошук за назвою або створи його вручну.';
+        }
+      });
+  }
+
+  function stopScan(){
+    if(scanner){ try{ scanner.reset(); }catch(e){} scanner = null; }
+  }
+  function loadZXing(done, fail){
+    if(window.ZXing) return done();
+    var el = document.createElement('script');
+    el.src = ZX_URL; el.onload = done; el.onerror = fail;
+    document.head.appendChild(el);
+  }
+  function startScan(){
+    only('scanview');
+    $('#sh-title').textContent = 'Сканер штрихкоду';
+    $('#scan-manual').value = '';
+    var msg = $('#scan-msg');
+    msg.textContent = 'Запускаю камеру…';
+    loadZXing(function(){
+      try{
+        var hints = new Map();
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E]);
+        scanner = new ZXing.BrowserMultiFormatReader(hints, 300);
+        var handled = false;
+        scanner.decodeFromConstraints({ video:{ facingMode:{ ideal:'environment' } } }, 'scan-video', function(result){
+          if(result && !handled){ handled = true; lookupCode(result.getText()); }
+        }).then(function(){
+          msg.textContent = 'Наведи камеру на штрихкод.';
+        }).catch(function(){
+          msg.textContent = 'Не вдалося відкрити камеру. Дозволь доступ до камери для цього сайту або введи цифри нижче.';
+        });
+      }catch(e){
+        msg.textContent = 'Сканер не запустився. Введи цифри штрихкоду нижче.';
+      }
+    }, function(){
+      msg.textContent = 'Не вдалося завантажити сканер. Перевір інтернет або введи цифри штрихкоду нижче.';
+    });
+  }
+
+  function saveFood(){
+    var name = $('#f-name').value.trim();
+    var p = num($('#f-p').value), c = num($('#f-c').value), f = num($('#f-f').value);
+    var kcal = num($('#f-kcal').value);
+    if(!name){ $('#f-err').textContent = 'Вкажи назву.'; return; }
+    if(!kcal && (p||c||f)) kcal = p*4 + c*4 + f*9;
+    if(!kcal){ $('#f-err').textContent = 'Вкажи калорії або хоча б білки, вуглеводи чи жири.'; return; }
+    var found = null;
+    state.foods.forEach(function(x){ if(x.name.toLowerCase()===name.toLowerCase()) found = x; });
+    var item = found || { id:uid() };
+    item.name = name; item.kcal = kcal; item.p = p; item.c = c; item.f = f;
+    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==item.id; }));
+    save();
+    $('#f-search').value = name;
+    showPick();
+  }
+  function addFood(id){
+    var item = null;
+    state.foods.forEach(function(x){ if(x.id===id) item = x; });
+    if(!item) return;
+    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:item.name, kcal:item.kcal, p:item.p, c:item.c, f:item.f });
+    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==id; }));
+    save(); closeSheet(); render();
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function(ev){
+    var t = ev.target;
+    var tab = t.closest('.tab');
+    if(tab){ view = tab.dataset.view; armedReset=false; render(); window.scrollTo(0,0); return; }
+
+    var pit = t.closest('.pitem:not(.ritem)');
+    if(pit){ addFood(pit.dataset.id); return; }
+    if(t.id==='f-new'){ showNew($('#f-search').value.trim()); return; }
+    if(t.id==='f-scan'){ startScan(); return; }
+    if(t.id==='f-remote'){
+      var q = $('#f-search').value.trim();
+      if(!q){ $('#plist').innerHTML = '<p class="note">Введи назву англійською в полі пошуку, наприклад chicken breast, і натисни «Шукати в базі USDA».</p>'; return; }
+      searchRemote(q); return;
+    }
+    if(t.id==='scan-back' || t.id==='rem-back'){ stopScan(); showPick(); return; }
+    if(t.id==='scan-go'){
+      var digits = $('#scan-manual').value.replace(/\D/g,'');
+      if(digits.length<8){ $('#scan-msg').textContent = 'Штрихкод має містити щонайменше 8 цифр.'; return; }
+      lookupCode(digits); return;
+    }
+    var rit = t.closest('.ritem');
+    if(rit){ pickRemote(+rit.dataset.i); return; }
+    if(t.id==='f-back'){ showPick(); return; }
+    if(t.id==='f-save'){ saveFood(); return; }
+    if(t.id==='f-cancel' || t.id==='overlay'){ closeSheet(); return; }
+
+    var b = t.closest('[data-act]');
+    if(!b) return;
+    var act = b.dataset.act;
+    if(act==='prev'){ day = shift(day,-1); render(); }
+    else if(act==='next'){ if(day<iso(new Date())){ day = shift(day,1); render(); } }
+    else if(act==='add'){ openSheet(b.dataset.meal); }
+    else if(act==='delfood'){
+      state.foods = state.foods.filter(function(x){ return x.id!==b.dataset.id; });
+      save(); render();
+    }
+    else if(act==='del'){
+      state.entries = state.entries.filter(function(e){ return e.id!==b.dataset.id; });
+      save(); render();
+    }
+    else if(act==='goto'){ day = b.dataset.day; view='today'; render(); window.scrollTo(0,0); }
+    else if(act==='export'){
+      var ta = $('#io'), msg = $('#iomsg');
+      ta.value = JSON.stringify(state);
+      ta.select();
+      var ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){}
+      if(!ok && navigator.clipboard){ try{ navigator.clipboard.writeText(ta.value); ok = true; }catch(e){} }
+      msg.textContent = ok ? 'Скопійовано. Встав текст у нотатки.' : 'Текст виділено, скопіюй його вручну.';
+    }
+    else if(act==='import'){
+      var ta2 = $('#io'), msg2 = $('#iomsg');
+      try{
+        var s = JSON.parse(ta2.value);
+        if(!s || !Array.isArray(s.entries)) throw new Error('bad');
+        state.entries = s.entries;
+        state.foods = foodsFrom(s);
+        state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0}, s.goal||{}); recalc();
+        save(); render();
+        $('#iomsg').textContent = 'Дані відновлено.';
+      }catch(e){ msg2.textContent = 'Не вдалося прочитати текст. Встав його повністю, як скопіював.'; }
+    }
+    else if(act==='reset'){
+      if(!armedReset){ armedReset = true; render(); return; }
+      state.entries = []; armedReset = false;
+      save(); render();
+      $('#iomsg').textContent = 'Усі записи видалено.';
+    }
+  });
+
+  document.addEventListener('change', function(ev){
+    if(ev.target.dataset && ev.target.dataset.usda){ state.usdaKey = ev.target.value.trim(); save(); return; }
+    var k = ev.target.dataset && ev.target.dataset.goal;
+    if(k){
+      var v = num(ev.target.value);
+      if(v>0){ state.goal[k] = v; recalc(); save(); }
+      ev.target.value = k==='weight' ? (state.goal.weight>0 ? state.goal.weight : '') : r(state.goal[k]);
+      var c = $('#calc'); if(c) c.innerHTML = calcHTML();
+    }
+  });
+
+  document.addEventListener('keydown', function(ev){
+    if(ev.key==='Escape') closeSheet();
+    if(ev.key==='Enter' && !$('#newform').hidden && ev.target.tagName==='INPUT'){ saveFood(); }
+  });
+
+  $('#f-search').addEventListener('input', renderPick);
+
+  load();
+  recalc();
+  render();
+})();
+</script>
+</body>
+</html>
