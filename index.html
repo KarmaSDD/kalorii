@@ -173,6 +173,14 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       <button class="second" id="f-goto" style="margin-top:0">Відкрити «Продукти»</button>
       <button class="ghost" id="f-cancel">Закрити</button>
     </div>
+    <div id="amtview" hidden>
+      <p class="note" id="amt-info" style="margin:0 0 10px"></p>
+      <label class="field"><span id="amt-label">Скільки грамів</span><input id="amt-val" type="text" inputmode="decimal" autocomplete="off"></label>
+      <p class="note" id="amt-total" role="status" style="margin:0 0 10px"></p>
+      <p class="err" id="amt-err"></p>
+      <button class="primary" id="amt-add">Додати</button>
+      <button class="ghost" id="amt-back">Назад до списку</button>
+    </div>
     <div id="scanview" hidden>
       <div class="vidwrap"><video id="scan-video" playsinline muted></video></div>
       <p class="note" id="scan-msg" role="status">Наведи камеру на штрихкод.</p>
@@ -245,6 +253,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     return list.filter(function(x){ return x && x.name; }).map(function(x){
       var name = String(x.name);
       var o = { id:x.id||uid(), name:name, kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
+      if(+x.lastAmount>0) o.lastAmount = +x.lastAmount;
       /* basis: older data has no field; names ending with ", 100 г" came from the bases per 100 g */
       o.basis = (x.basis==='100g' || x.basis==='portion') ? x.basis : (/100\s*г\s*$/i.test(name) ? '100g' : 'portion');
       if(Array.isArray(x.ingredients) && x.ingredients.length){
@@ -452,9 +461,10 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function foodsHTML(){
     var h = '<div class="dayhead"><h1>Продукти</h1></div>';
     h += '<section class="panel"><h2>Додати</h2>'
-      + '<button class="primary" style="margin-top:0" data-act="newfood">Новий продукт</button>'
-      + '<button class="second" data-act="newdish">Нова страва з інгредієнтів</button>'
-      + '<div class="srcrow" style="margin:8px 0 0"><button data-act="scan">Сканувати штрихкод</button><button data-act="remote">Шукати в базі USDA</button></div>'
+      + '<button class="primary" style="margin-top:0" data-act="scan">Сканувати штрихкод</button>'
+      + '<button class="second" data-act="remote">Шукати в базі</button>'
+      + '<button class="second" data-act="newdish">Нова страва</button>'
+      + '<button class="second" data-act="newfood">Новий продукт</button>'
       + '</section>';
     h += '<section class="panel"><h2>Збережені продукти</h2>'
       + '<label class="field"><span>Пошук</span><input id="food-q" type="text" autocomplete="off" placeholder="Почни вводити назву" value="'+esc(foodQuery)+'"></label>'
@@ -465,7 +475,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
 
   /* ---------- sheet ---------- */
-  var VIEWS = ['pick','scanview','remoteview','newform'];
+  var VIEWS = ['pick','amtview','scanview','remoteview','newform'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
   function openOverlay(){ $('#overlay').classList.add('open'); }
   function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); }
@@ -512,7 +522,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function updateDishTotal(){
     dishRows.forEach(function(x,i){
       var el = document.querySelector('[data-ik="'+i+'"]');
-      if(el) el.textContent = r(ingVals(x).kcal)+' ккал';
+      var v = ingVals(x);
+      if(el) el.textContent = x.amount>0 ? r(v.kcal)+' ккал, '+macroLine(v) : 'Вкажи кількість';
     });
     var t = dishTotal(), s = servings();
     var h = '';
@@ -539,7 +550,9 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     box.hidden = false;
     if(!pool.length) box.innerHTML = '<p class="note">Продуктів для інгредієнтів ще немає. Спочатку створи їх як окремі продукти.</p>';
     else if(!list.length) box.innerHTML = '<p class="note">Нічого не знайдено.</p>';
-    else box.innerHTML = list.map(function(x){ return foodItem(x,'iitem'); }).join('');
+    else box.innerHTML = list.map(function(x){
+      return '<button class="pitem iitem" data-id="'+esc(x.id)+'"><span class="pn">'+esc(x.name)+'</span></button>';
+    }).join('');
   }
   function addIng(id){
     var x = findFood(id);
@@ -778,13 +791,40 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(isNew) state.foods = [item].concat(state.foods);
     save(); closeSheet(); render();
   }
-  function addFood(id){
-    var item = findFood(id);
+  /* amount step: grams for products per 100 g, portions for the rest */
+  var amtFood = null;
+  function baseName(x){ return x.name.replace(/,?\s*100\s*г\s*$/i, '') || x.name; }
+  function amtVals(){
+    var a = num($('#amt-val').value);
+    var k = amtFood.basis==='100g' ? a/100 : a;
+    return { a:a, kcal:amtFood.kcal*k, p:amtFood.p*k, c:amtFood.c*k, f:amtFood.f*k };
+  }
+  function updateAmt(){
+    var v = amtVals();
+    $('#amt-total').textContent = v.a ? 'Буде додано: '+r(v.kcal)+' ккал, '+macroLine(v)+'.' : '';
+    $('#amt-err').textContent = '';
+  }
+  function showAmount(id){
+    var x = findFood(id);
+    if(!x) return;
+    amtFood = x;
+    var g = x.basis==='100g';
+    $('#sh-title').textContent = baseName(x);
+    $('#amt-info').textContent = (g ? 'На 100 г: ' : 'На порцію: ')+r(x.kcal)+' ккал, '+macroLine(x)+'.';
+    $('#amt-label').textContent = g ? 'Скільки грамів' : 'Скільки порцій';
+    $('#amt-val').value = fmt(x.lastAmount>0 ? x.lastAmount : (g ? 100 : 1));
+    updateAmt();
+    only('amtview');
+    setTimeout(function(){ var el = $('#amt-val'); el.focus(); el.select(); }, 50);
+  }
+  function addFood(){
+    var item = amtFood, v = amtVals();
     if(!item) return;
-    var name = item.name;
-    if(item.basis==='100g' && !/100\s*г\s*$/i.test(name)) name += ', 100 г';
-    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:item.kcal, p:item.p, c:item.c, f:item.f });
-    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==id; }));
+    if(!(v.a>0)){ $('#amt-err').textContent = item.basis==='100g' ? 'Вкажи, скільки грамів.' : 'Вкажи, скільки порцій.'; return; }
+    var name = item.basis==='100g' ? baseName(item)+', '+fmt(v.a)+' г' : (v.a===1 ? item.name : item.name+' × '+fmt(v.a));
+    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:v.kcal, p:v.p, c:v.c, f:v.f });
+    item.lastAmount = v.a;
+    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==item.id; }));
     save(); closeSheet(); render();
   }
 
@@ -796,7 +836,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 
     var it = t.closest('.pitem');
     if(it){
-      if(it.classList.contains('aitem')) addFood(it.dataset.id);
+      if(it.classList.contains('aitem')) showAmount(it.dataset.id);
       else if(it.classList.contains('fitem')) openForm(findFood(it.dataset.id));
       else if(it.classList.contains('iitem')) addIng(it.dataset.id);
       else if(it.classList.contains('ritem')) pickRemote(+it.dataset.i);
@@ -814,6 +854,12 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       var q = $('#rem-q').value.trim();
       if(!q){ $('#rem-msg').textContent = 'Введи назву англійською, наприклад chicken breast.'; return; }
       searchRemote(q); return;
+    }
+    if(t.id==='amt-add'){ addFood(); return; }
+    if(t.id==='amt-back'){
+      only('pick');
+      $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
+      return;
     }
     if(t.id==='f-save'){ saveFood(); return; }
     if(t.id==='f-del'){
@@ -885,6 +931,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     else if(t.id==='food-q'){ foodQuery = t.value; $('#foodlist').innerHTML = foodListHTML(); }
     else if(t.id==='ing-search') renderIngList();
     else if(t.id==='f-serv') updateDishTotal();
+    else if(t.id==='amt-val') updateAmt();
     else if(t.dataset && t.dataset.ing!==undefined){
       var row = dishRows[+t.dataset.ing];
       if(row){ row.amount = num(t.value); updateDishTotal(); }
@@ -900,6 +947,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     var id = ev.target.id;
     if(id==='rem-q'){ $('#rem-go').click(); }
     else if(id==='scan-manual'){ $('#scan-go').click(); }
+    else if(id==='amt-val'){ addFood(); }
     else if(!$('#newform').hidden && id!=='ing-search' && $('#overlay').classList.contains('open')){ saveFood(); }
   });
 
