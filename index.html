@@ -85,9 +85,9 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .addbtn{width:100%;margin-top:6px;padding:10px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--accent);font-weight:600}
 
 /* sheet */
-.overlay{position:fixed;inset:0;background:rgba(10,12,16,.5);display:none;align-items:flex-end;z-index:20}
+.overlay{position:fixed;inset:0;background:rgba(10,12,16,.5);display:none;align-items:flex-end;z-index:20;overscroll-behavior:contain;touch-action:none}
 .overlay.open{display:flex}
-.sheet{width:100%;max-width:480px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto}
+.sheet{width:100%;max-width:480px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;max-height:92dvh;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .sheet h3{margin:0 0 12px;font-size:18px}
 [hidden]{display:none!important}
 .field{display:block;margin-bottom:10px}
@@ -477,8 +477,25 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   /* ---------- sheet ---------- */
   var VIEWS = ['pick','amtview','scanview','remoteview','newform'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
-  function openOverlay(){ $('#overlay').classList.add('open'); }
-  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); }
+  /* while the sheet is open the page behind it is pinned, so only the sheet scrolls (iOS Safari) */
+  var lockY = 0, locked = false;
+  function lockPage(){
+    if(locked) return;
+    locked = true;
+    lockY = window.scrollY || 0;
+    var pad = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
+    var b = document.body.style;
+    b.position = 'fixed'; b.left = '0'; b.right = '0'; b.top = (pad - lockY) + 'px';
+  }
+  function unlockPage(){
+    if(!locked) return;
+    locked = false;
+    var b = document.body.style;
+    b.position = ''; b.left = ''; b.right = ''; b.top = '';
+    window.scrollTo(0, lockY);
+  }
+  function openOverlay(){ lockPage(); $('#overlay').classList.add('open'); }
+  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); unlockPage(); }
 
   function renderPick(){
     var list = matchFoods($('#f-search').value);
