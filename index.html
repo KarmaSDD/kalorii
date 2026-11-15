@@ -121,8 +121,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* tabs */
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,0px);z-index:10}
-.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.tab{border:0;background:transparent;padding:12px 2px;border-radius:12px;font-weight:500;font-size:15px;color:var(--muted)}
+.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.tab{border:0;background:transparent;padding:12px 0;border-radius:12px;font-weight:500;font-size:14px;color:var(--muted);white-space:nowrap}
 .tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg)}
 
 /* week */
@@ -148,6 +148,25 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 .btnrow .danger{color:var(--warn)}
 .note{color:var(--muted);font-size:13px;margin:8px 0 0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.mrec{padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.panel h2 + .mrec{border-top:0;padding-top:4px}
+.mtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:600}
+.mtop small{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
+.msub{color:var(--muted);font-size:14px;margin-top:2px}
+.thumbs{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
+.thumbs img{width:56px;height:74px;object-fit:cover;border-radius:8px;background:var(--bg);flex:none}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.photos:empty{display:none}
+.ph{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--bg)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .del{position:absolute;top:4px;right:4px;width:28px;height:28px;background:rgba(10,12,16,.6);color:#fff}
+.filebtn{display:block;text-align:center;margin:0 0 10px;cursor:pointer}
+.static{font-size:16px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);color:var(--muted)}
+.viewer{position:fixed;inset:0;background:#000;display:none;align-items:center;justify-content:center;z-index:30}
+.viewer.open{display:flex}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--f);vertical-align:middle}
+.dot.warn{background:var(--c)}
 </style>
 </head>
 <body>
@@ -160,9 +179,12 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     <button class="tab" data-view="today">Сьогодні</button>
     <button class="tab" data-view="week">Тиждень</button>
     <button class="tab" data-view="foods">Продукти</button>
+    <button class="tab" data-view="measures">Заміри</button>
     <button class="tab" data-view="settings">Ціль</button>
   </div>
 </nav>
+
+<div class="viewer" id="viewer" role="dialog" aria-label="Фото"><img id="viewer-img" alt="Фото на весь екран"></div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Додати їжу">
   <div class="sheet">
@@ -180,6 +202,23 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       <p class="err" id="amt-err"></p>
       <button class="primary" id="amt-add">Додати</button>
       <button class="ghost" id="amt-back">Назад до списку</button>
+    </div>
+    <div id="mform" hidden>
+      <label class="field"><span>Дата</span><input id="m-date" type="date"></label>
+      <label class="field"><span>Вага, кг</span><input id="m-weight" type="text" inputmode="decimal" autocomplete="off"></label>
+      <div class="sgrid">
+        <label class="field"><span>Груди, см</span><input id="m-chest" type="text" inputmode="decimal" autocomplete="off"></label>
+        <label class="field"><span>Біцепс, см</span><input id="m-biceps" type="text" inputmode="decimal" autocomplete="off"></label>
+        <label class="field"><span>Талія, см</span><input id="m-waist" type="text" inputmode="decimal" autocomplete="off"></label>
+        <label class="field"><span>Стегно, см</span><input id="m-thigh" type="text" inputmode="decimal" autocomplete="off"></label>
+      </div>
+      <span class="lbl">Фото</span>
+      <div class="photos" id="m-photos"></div>
+      <label class="second filebtn">Додати фото<input id="m-file" type="file" accept="image/*" multiple hidden></label>
+      <p class="err" id="m-err" role="status"></p>
+      <button class="primary" id="m-save">Зберегти</button>
+      <button class="danger-ghost" id="m-del" hidden>Видалити запис</button>
+      <button class="ghost" id="m-back">Закрити</button>
     </div>
     <div id="scanview" hidden>
       <div class="vidwrap"><video id="scan-video" playsinline muted></video></div>
@@ -229,7 +268,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 <script>
 (function(){
   var KEY = 'kalorii:v1';
-  var state = { goal:{kcal:2000,p:120,c:220,f:65,weight:0}, entries:[], foods:[], usdaKey:'' };
+  var state = { goal:{kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, entries:[], foods:[], measures:[], usdaKey:'', deleted:{}, updatedAt:0 };
   var storageOk = true;
   var view = 'today';
   var day = iso(new Date());
@@ -254,6 +293,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       var name = String(x.name);
       var o = { id:x.id||uid(), name:name, kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
       if(+x.lastAmount>0) o.lastAmount = +x.lastAmount;
+      if(+x.u>0) o.u = +x.u;
       /* basis: older data has no field; names ending with ", 100 г" came from the bases per 100 g */
       o.basis = (x.basis==='100g' || x.basis==='portion') ? x.basis : (/100\s*г\s*$/i.test(name) ? '100g' : 'portion');
       if(Array.isArray(x.ingredients) && x.ingredients.length){
@@ -275,21 +315,33 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
         if(s && Array.isArray(s.entries)){
           state.entries = s.entries;
           state.foods = foodsFrom(s);
+          state.measures = measuresFrom(s);
+          state.updatedAt = +s.updatedAt || 0;
+          state.deleted = s.deleted && typeof s.deleted==='object' ? s.deleted : {};
           state.usdaKey = typeof s.usdaKey === 'string' ? s.usdaKey : '';
           state.goal = Object.assign({}, state.goal, s.goal||{});
         }
       }
     }catch(e){ storageOk = false; }
   }
-  function save(){
+  function saveLocal(){
     try{ localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
     catch(e){ storageOk = false; }
   }
+  /* every change gets a timestamp; the newest copy wins when syncing with the server */
+  function save(){
+    state.updatedAt = Date.now();
+    saveLocal();
+    markDirty();
+  }
+  /* remember a deleted record so that syncing does not bring it back from the server */
+  function tomb(id){ state.deleted[id] = Date.now(); }
 
   function recalc(){
     var g = state.goal;
     if(g.weight>0){
-      g.p = g.weight*2;
+      if(!(g.pPerKg>0)) g.pPerKg = 2;
+      g.p = g.weight*g.pPerKg;
       g.f = g.weight*1;
       g.c = Math.max((g.kcal - g.p*4 - g.f*9)/4, 0);
     }
@@ -297,7 +349,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function calcHTML(){
     var g = state.goal;
     if(!(g.weight>0)) return '<p class="note" style="margin:0">Вкажи вагу, і норму білків, жирів та вуглеводів буде розраховано автоматично.</p>';
-    var h = '<div class="row" style="border-top:0"><div class="rname">Білки<small>2 г на кг</small></div><div class="rk">'+r(g.p)+' г</div></div>'
+    var h = '<div class="row" style="border-top:0"><div class="rname">Білки<small>'+fmtN(g.pPerKg)+' г на кг</small></div><div class="rk">'+r(g.p)+' г</div></div>'
       + '<div class="row"><div class="rname">Жири<small>1 г на кг</small></div><div class="rk">'+r(g.f)+' г</div></div>'
       + '<div class="row"><div class="rname">Вуглеводи<small>решта калорій</small></div><div class="rk">'+r(g.c)+' г</div></div>';
     if(g.kcal < g.p*4 + g.f*9) h += '<p class="err" style="margin-top:10px">Калорій замало: білки й жири для цієї ваги вже дають '+r(g.p*4+g.f*9)+' ккал. Збільш денну ціль.</p>';
@@ -414,14 +466,20 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     function inp(key,label,val){ return '<label class="field"><span>'+label+'</span><input type="text" inputmode="decimal" data-goal="'+key+'" value="'+val+'"></label>'; }
     var h = '<div class="dayhead"><h1>Ціль і дані</h1></div>';
     h += '<section class="panel"><h2>Денна ціль</h2><div class="sgrid">'
-      + inp('weight','Вага, кг', g.weight>0 ? g.weight : '') + inp('kcal','Калорії, ккал', r(g.kcal))
-      + '</div><p class="note">2 г білка і 1 г жиру на кг ваги, решта калорій іде у вуглеводи. Зміни зберігаються одразу.</p></section>'
+      + (latestWeight()
+          ? '<div class="field"><span>Вага, кг</span><div class="static">'+fmtN(g.weight)+'</div></div>'
+          : inp('weight','Вага, кг', g.weight>0 ? g.weight : ''))
+      + inp('kcal','Калорії, ккал', r(g.kcal))
+      + inp('pPerKg','Білок, г на кг ваги', g.pPerKg>0 ? g.pPerKg : 2)
+      + '</div><p class="note">'+(latestWeight() ? 'Вага береться з найновішого запису у вкладці «Заміри». ' : 'Вагу можна вказати тут або записувати у вкладці «Заміри». ')
+      + 'Білок рахується за твоїм значенням на кг ваги, жир 1 г на кг, решта калорій іде у вуглеводи. Зміни зберігаються одразу.</p></section>'
       + '<section class="panel"><h2>Норма БЖВ</h2><div id="calc">'+calcHTML()+'</div></section>';
+    h += syncHTML();
     h += '<section class="panel"><h2>База продуктів USDA</h2>'
       + '<label class="field"><span>Власний ключ API (необов’язково)</span><input type="text" id="usda-key" data-usda="1" autocomplete="off" autocapitalize="off" value="'+esc(state.usdaKey||'')+'"></label>'
       + '<p class="note" style="margin:0">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup.</p></section>';
     h += '<section class="panel"><h2>Резервна копія</h2>'
-      + '<p class="note" style="margin-top:0">Дані лежать лише в цьому браузері. Скопіюй їх і збережи в нотатках, щоб не втратити.</p>'
+      + '<p class="note" style="margin-top:0">Текстова копія всіх даних, крім фото. Скопіюй її і збережи в нотатках як запасний варіант.</p>'
       + '<textarea id="io" spellcheck="false" aria-label="Дані у форматі JSON"></textarea>'
       + '<div class="btnrow"><button data-act="export">Показати й скопіювати</button><button data-act="import">Відновити з тексту</button></div>'
       + '<p class="note" id="iomsg" role="status"></p>'
@@ -436,8 +494,459 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       b.setAttribute('aria-current', b.dataset.view===view ? 'page' : 'false');
     });
     var m = $('#main');
-    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : settingsHTML();
+    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML() : settingsHTML();
+    hydratePhotos(m);
   }
+
+  /* ---------- measurements ---------- */
+  var MF = [['weight','Вага','кг'],['chest','Груди','см'],['biceps','Біцепс','см'],['waist','Талія','см'],['thigh','Стегно','см']];
+  function fmtN(n){ return String(Math.round(n*10)/10).replace('.', ','); }
+  function measuresFrom(s){
+    var list = Array.isArray(s.measures) ? s.measures : [];
+    return list.filter(function(x){ return x && /^\d{4}-\d{2}-\d{2}$/.test(x.date); }).map(function(x){
+      var o = { id:x.id||uid(), date:x.date };
+      if(+x.u>0) o.u = +x.u;
+      MF.forEach(function(f){ o[f[0]] = +x[f[0]]>0 ? +x[f[0]] : 0; });
+      o.photos = Array.isArray(x.photos) ? x.photos.filter(function(p){ return typeof p==='string' && p; }) : [];
+      return o;
+    });
+  }
+  function sortedMeasures(){
+    return state.measures.map(function(m,i){ return {m:m,i:i}; })
+      .sort(function(a,b){ return a.m.date<b.m.date ? 1 : a.m.date>b.m.date ? -1 : b.i-a.i; })
+      .map(function(x){ return x.m; });
+  }
+  function latestWeight(){
+    var list = sortedMeasures();
+    for(var i=0;i<list.length;i++){ if(list[i].weight>0) return list[i]; }
+    return null;
+  }
+  /* the goal uses the weight from the newest measurement that has one */
+  function syncWeight(){
+    var m = latestWeight();
+    if(m) state.goal.weight = m.weight;
+    recalc();
+  }
+  function findMeasure(id){ var it = null; state.measures.forEach(function(x){ if(x.id===id) it = x; }); return it; }
+  function measuresHTML(){
+    var list = sortedMeasures();
+    var h = '<div class="dayhead"><h1>Заміри</h1></div>';
+    h += '<section class="panel"><button class="primary" style="margin-top:0" data-act="newmeasure">Новий запис</button>'
+      + '<p class="note">Вага з найновішого запису використовується для розрахунку цілі.</p></section>';
+    h += '<section class="panel"><h2>Історія</h2>';
+    if(!list.length) h += '<p class="note" style="margin:0">Записів ще немає. Додай перший: вагу, заміри або фото.</p>';
+    list.forEach(function(m, i){
+      var prev = null;
+      for(var j=i+1;j<list.length && m.weight>0;j++){ if(list[j].weight>0){ prev = list[j]; break; } }
+      var date = parseIso(m.date).toLocaleDateString('uk-UA',{day:'numeric', month:'long', year:'numeric'});
+      var w = '';
+      if(m.weight>0){
+        w = fmtN(m.weight)+' кг';
+        if(prev){
+          var d = Math.round((m.weight - prev.weight)*10)/10;
+          if(d!==0) w += '<small>'+(d>0?'+':'−')+fmtN(Math.abs(d))+'</small>';
+        }
+      }
+      var parts = [];
+      MF.slice(1).forEach(function(f){ if(m[f[0]]>0) parts.push(f[1]+' '+fmtN(m[f[0]])+' '+f[2]); });
+      h += '<div class="mrec" data-act="editmeasure" data-id="'+esc(m.id)+'" role="button" tabindex="0">'
+        + '<div class="mtop"><span>'+esc(date)+'</span><span>'+w+'</span></div>';
+      if(parts.length) h += '<div class="msub">'+parts.join(', ')+'</div>';
+      if(m.photos.length) h += '<div class="thumbs">'+m.photos.map(function(p){ return '<img data-photo="'+esc(p)+'" data-view="'+esc(p)+'" alt="Фото за '+esc(date)+'">'; }).join('')+'</div>';
+      h += '</div>';
+    });
+    if(list.length) h += '<p class="note">Торкнися запису, щоб змінити або видалити його. Торкнися фото, щоб відкрити його на весь екран.</p>';
+    return h + '</section>';
+  }
+
+  /* photos live in IndexedDB (too big for localStorage); state keeps only their ids */
+  var PDB = null, photoUrls = {};
+  function pdb(){
+    if(!PDB) PDB = new Promise(function(res, rej){
+      var rq = indexedDB.open('kalorii-photos', 1);
+      rq.onupgradeneeded = function(){ rq.result.createObjectStore('photos'); };
+      rq.onsuccess = function(){ res(rq.result); };
+      rq.onerror = function(){ PDB = null; rej(rq.error); };
+    });
+    return PDB;
+  }
+  function ptx(mode, fn){
+    return pdb().then(function(db){
+      return new Promise(function(res, rej){
+        var tx = db.transaction('photos', mode);
+        var rq = fn(tx.objectStore('photos'));
+        tx.oncomplete = function(){ res(rq && rq.result); };
+        tx.onerror = tx.onabort = function(){ rej(tx.error); };
+      });
+    });
+  }
+  function putPhoto(id, blob){ return ptx('readwrite', function(s){ return s.put(blob, id); }); }
+  function delPhoto(id){
+    if(photoUrls[id]){ URL.revokeObjectURL(photoUrls[id]); delete photoUrls[id]; }
+    if(meta.uid && meta.up[id]){ meta.del.push(id); delete meta.up[id]; saveMeta(); }
+    return ptx('readwrite', function(s){ return s.delete(id); }).catch(function(){});
+  }
+  function photoUrl(id){
+    if(photoUrls[id]) return Promise.resolve(photoUrls[id]);
+    return ptx('readonly', function(s){ return s.get(id); }).then(function(b){
+      if(!b) return '';
+      if(!photoUrls[id]) photoUrls[id] = URL.createObjectURL(b);
+      return photoUrls[id];
+    });
+  }
+  function hydratePhotos(root){
+    (root||document).querySelectorAll('img[data-photo]').forEach(function(img){
+      if(img.getAttribute('src')) return;
+      photoUrl(img.dataset.photo).then(function(u){ if(u) img.src = u; }).catch(function(){});
+    });
+  }
+  /* compress like Telegram does: at most 1280 px on the long side, JPEG quality 0.87 */
+  function shrink(file){
+    return new Promise(function(res, rej){
+      var url = URL.createObjectURL(file);
+      var im = new Image();
+      im.onload = function(){
+        var k = Math.min(1, 1280/Math.max(im.naturalWidth, im.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(im.naturalWidth*k));
+        c.height = Math.max(1, Math.round(im.naturalHeight*k));
+        var cx = c.getContext('2d');
+        cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
+        cx.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(b){ if(b) res(b); else rej(new Error('blob')); }, 'image/jpeg', 0.87);
+      };
+      im.onerror = function(){ URL.revokeObjectURL(url); rej(new Error('img')); };
+      im.src = url;
+    });
+  }
+  function openViewer(id){
+    photoUrl(id).then(function(u){
+      if(!u) return;
+      $('#viewer-img').src = u;
+      $('#viewer').classList.add('open');
+    }).catch(function(){});
+  }
+  function closeViewer(){ $('#viewer').classList.remove('open'); }
+
+  var mEditId = null, mPhotos = [], mNew = [], armedMDel = false;
+  function renderMPhotos(){
+    var box = $('#m-photos');
+    box.innerHTML = mPhotos.map(function(id){
+      return '<div class="ph"><img data-photo="'+esc(id)+'" data-view="'+esc(id)+'" alt="Фото">'
+        + '<button class="del" data-act="delphoto" data-id="'+esc(id)+'" aria-label="Прибрати фото">×</button></div>';
+    }).join('');
+    hydratePhotos(box);
+  }
+  function openMeasure(rec){
+    mEditId = rec ? rec.id : null;
+    mPhotos = rec ? rec.photos.slice() : [];
+    mNew = [];
+    armedMDel = false;
+    var today = iso(new Date());
+    $('#m-date').max = today;
+    $('#m-date').value = rec ? rec.date : today;
+    MF.forEach(function(f){ $('#m-'+f[0]).value = rec && rec[f[0]]>0 ? fmtN(rec[f[0]]) : ''; });
+    $('#m-err').textContent = '';
+    $('#m-del').hidden = !rec;
+    $('#m-del').textContent = 'Видалити запис';
+    $('#sh-title').textContent = rec ? 'Змінити запис' : 'Новий запис';
+    renderMPhotos();
+    only('mform');
+    openOverlay();
+  }
+  function addPhotos(files){
+    var err = $('#m-err');
+    err.textContent = 'Додаю фото…';
+    var chain = Promise.resolve(), failed = 0;
+    Array.prototype.forEach.call(files, function(file){
+      chain = chain.then(function(){
+        var id = 'ph' + uid();
+        return shrink(file).then(function(blob){ return putPhoto(id, blob); }).then(function(){
+          mPhotos.push(id); mNew.push(id);
+        }).catch(function(){ failed++; });
+      });
+    });
+    chain.then(function(){
+      err.textContent = failed ? 'Не вдалося додати фото. Спробуй інший файл.' : '';
+      renderMPhotos();
+    });
+  }
+  function saveMeasure(){
+    var err = $('#m-err');
+    var date = $('#m-date').value;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ err.textContent = 'Вкажи дату.'; return; }
+    if(date > iso(new Date())){ err.textContent = 'Дата не може бути в майбутньому.'; return; }
+    var vals = {}, any = false;
+    MF.forEach(function(f){ vals[f[0]] = num($('#m-'+f[0]).value); if(vals[f[0]]>0) any = true; });
+    if(!any && !mPhotos.length){ err.textContent = 'Вкажи вагу, хоча б один замір або додай фото.'; return; }
+    var rec = mEditId && findMeasure(mEditId);
+    if(rec){
+      rec.photos.forEach(function(p){ if(mPhotos.indexOf(p)===-1) delPhoto(p); });
+    } else {
+      rec = { id:uid() };
+      state.measures.push(rec);
+    }
+    rec.date = date;
+    MF.forEach(function(f){ rec[f[0]] = vals[f[0]]; });
+    rec.photos = mPhotos.slice();
+    rec.u = Date.now();
+    mNew = [];
+    syncWeight(); save(); closeSheet(); render();
+  }
+  function deleteMeasure(){
+    var rec = findMeasure(mEditId);
+    if(rec){
+      rec.photos.forEach(delPhoto);
+      tomb(rec.id);
+      state.measures = state.measures.filter(function(x){ return x.id!==rec.id; });
+    }
+    syncWeight(); save(); closeSheet(); render();
+  }
+
+  /* ---------- sync with Supabase ----------
+     Local-first: everything keeps working from localStorage and IndexedDB.
+     When signed in, the whole state is one row in app_state and photos are files
+     photos/<user id>/<photo id>.jpg. The local and the server copies are MERGED, never
+     replaced: records are matched by id, the one with the newer stamp `u` wins, and
+     deletions travel as tombstones in state.deleted. */
+  var SB_URL = 'https://lhshveskcdxhfsadntmm.supabase.co';
+  var SB_KEY = 'sb_publishable_erH5_cU3tUnbbpR1GbK3gg_e8jUaA7u';
+  var SB_SDK = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  var META_KEY = 'kalorii:sync';
+  var TOMB_TTL = 180*24*3600*1000;
+  var sb = null, sbUser = null, sbLoading = null;
+  var syncBusy = false, syncAgain = false, syncTimer = null, syncState = 'idle', syncText = '', lastPull = 0, changes = 0;
+  var meta = { email:'', uid:'', linked:false, dirty:false, at:0, up:{}, del:[] };
+  try{
+    var mraw = JSON.parse(localStorage.getItem(META_KEY) || 'null');
+    if(mraw && typeof mraw==='object'){
+      meta.email = String(mraw.email||''); meta.uid = String(mraw.uid||''); meta.linked = !!mraw.linked;
+      meta.dirty = !!mraw.dirty; meta.at = +mraw.at||0;
+      meta.up = mraw.up && typeof mraw.up==='object' ? mraw.up : {};
+      meta.del = Array.isArray(mraw.del) ? mraw.del : [];
+    }
+  }catch(e){}
+  function saveMeta(){ try{ localStorage.setItem(META_KEY, JSON.stringify(meta)); }catch(e){} }
+
+  function initSb(){
+    if(sb) return Promise.resolve(sb);
+    if(!sbLoading) sbLoading = new Promise(function(res, rej){
+      function make(){
+        try{ sb = window.supabase.createClient(SB_URL, SB_KEY); res(sb); }
+        catch(e){ sbLoading = null; rej(e); }
+      }
+      if(window.supabase && window.supabase.createClient) return make();
+      var el = document.createElement('script');
+      el.src = SB_SDK; el.onload = make;
+      el.onerror = function(){ sbLoading = null; rej(new Error('sdk')); };
+      document.head.appendChild(el);
+    });
+    return sbLoading;
+  }
+
+  /* ----- status shown in the «Ціль» tab ----- */
+  function syncStatusHTML(){
+    if(!sbUser) return esc(syncText);
+    var last = meta.at ? ' Востаннє: ' + new Date(meta.at).toLocaleString('uk-UA',{day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'}) + '.' : '';
+    if(syncState==='busy') return '<i class="dot warn"></i>Синхронізую…';
+    if(syncState==='error') return '<i class="dot warn"></i>Не синхронізовано: немає зв’язку із сервером. Дані лишаються на телефоні.' + last;
+    if(meta.dirty) return '<i class="dot warn"></i>Є зміни, ще не збережені на сервері.' + last;
+    return '<i class="dot"></i>Синхронізовано.' + last;
+  }
+  function showSync(){ var el = $('#sync-msg'); if(el) el.innerHTML = syncStatusHTML(); }
+  function setSyncText(t){ syncText = t; showSync(); }
+  function syncHTML(){
+    var h = '<section class="panel" id="syncbox"><h2>Синхронізація</h2>';
+    if(sbUser){
+      h += '<p class="note" style="margin-top:0">Увійшов як '+esc(sbUser.email||'')+'. Дані й фото зберігаються на сервері автоматично: після кожної зміни і щоразу, коли відкриваєш застосунок.</p>'
+        + '<div class="btnrow"><button data-act="syncnow">Синхронізувати зараз</button><button data-act="logout">Вийти</button></div>';
+    } else {
+      h += '<p class="note" style="margin-top:0">Увійди, щоб записи, продукти, заміри й фото зберігалися на сервері. Дані із сервера й з цього телефона буде об’єднано.</p>'
+        + '<label class="field"><span>Пошта</span><input id="sync-email" type="email" autocomplete="username" autocapitalize="off" value="'+esc(meta.email||'')+'"></label>'
+        + '<label class="field"><span>Пароль</span><input id="sync-pass" type="password" autocomplete="current-password"></label>'
+        + '<div class="btnrow" style="margin-top:0"><button data-act="login">Увійти</button></div>';
+    }
+    h += '<p class="note" id="sync-msg" role="status">'+syncStatusHTML()+'</p></section>';
+    return h;
+  }
+  function refreshSyncBox(){
+    var box = $('#syncbox');
+    if(box) box.outerHTML = syncHTML();
+  }
+
+  /* ----- merge ----- */
+  function mergeList(a, b, dead){
+    var map = {}, out = [];
+    (a||[]).forEach(function(x){ if(x && x.id && !map[x.id]){ map[x.id] = x; out.push(x); } });
+    (b||[]).forEach(function(x){
+      if(!x || !x.id) return;
+      var cur = map[x.id];
+      if(!cur){ map[x.id] = x; out.push(x); }
+      else if((+x.u||0) > (+cur.u||0)){ out[out.indexOf(cur)] = x; map[x.id] = x; }
+    });
+    return out.filter(function(x){ var d = dead[x.id]; return !(d && d >= (+x.u||0)); });
+  }
+  /* L = this phone, R = server. preferRemote: first sync of this phone, so on a tie the server wins. */
+  function mergeStates(L, R, preferRemote){
+    var lNewer = (+L.updatedAt||0) >= (+R.updatedAt||0);
+    var newer = lNewer ? L : R, older = lNewer ? R : L;
+    var dead = {}, now = Date.now();
+    [L.deleted, R.deleted].forEach(function(d){
+      if(d && typeof d==='object') Object.keys(d).forEach(function(k){
+        var t = +d[k]||0;
+        if(now - t < TOMB_TTL && !(dead[k] >= t)) dead[k] = t;
+      });
+    });
+    var lg = L.goal||{}, rg = R.goal||{}, lu = +lg.u||0, ru = +rg.u||0;
+    var goal = lu>ru ? lg : ru>lu ? rg : (preferRemote ? rg : (newer.goal||{}));
+    var key = (newer.usdaKey || older.usdaKey || '');
+    if(preferRemote && R.usdaKey) key = R.usdaKey;
+    return {
+      goal: goal, usdaKey: key, deleted: dead,
+      entries: mergeList(newer.entries, older.entries, dead),
+      foods: mergeList(newer.foods, older.foods, dead),
+      measures: mergeList(newer.measures, older.measures, dead),
+      updatedAt: Math.max(+L.updatedAt||0, +R.updatedAt||0)
+    };
+  }
+  /* compact fingerprint: tells whether two copies hold the same data */
+  function sig(s){
+    function ids(list){ return (list||[]).map(function(x){ return x.id+':'+(+x.u||0); }).sort(); }
+    var g = s.goal||{};
+    return JSON.stringify([ids(s.entries), ids(s.foods), ids(s.measures),
+      [+g.kcal||0, +g.weight||0, +g.pPerKg||0, +g.u||0], s.usdaKey||'', Object.keys(s.deleted||{}).sort()]);
+  }
+  function adopt(s){
+    state.entries = Array.isArray(s.entries) ? s.entries : [];
+    state.foods = foodsFrom(s);
+    state.measures = measuresFrom(s);
+    state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, s.goal||{});
+    state.usdaKey = typeof s.usdaKey==='string' ? s.usdaKey : '';
+    state.deleted = s.deleted && typeof s.deleted==='object' ? s.deleted : {};
+    state.updatedAt = +s.updatedAt || Date.now();
+    syncWeight();
+    saveLocal();
+    if(!$('#overlay').classList.contains('open')) render();
+  }
+  function pushState(){
+    if(!state.updatedAt){ state.updatedAt = Date.now(); saveLocal(); }
+    return sb.from('app_state').upsert({ user_id:sbUser.id, data:state, updated_at:new Date(state.updatedAt).toISOString() })
+      .then(function(r){ if(r.error) throw r.error; });
+  }
+
+  /* ----- photos ----- */
+  function getBlob(id){ return ptx('readonly', function(s){ return s.get(id); }); }
+  function syncPhotos(){
+    var bucket = sb.storage.from('photos'), uid = sbUser.id;
+    var ids = [];
+    state.measures.forEach(function(m){ m.photos.forEach(function(p){ if(ids.indexOf(p)===-1) ids.push(p); }); });
+    var chain = Promise.resolve();
+    var gone = meta.del.filter(function(id){ return ids.indexOf(id)===-1; });
+    if(gone.length){
+      chain = chain.then(function(){
+        return bucket.remove(gone.map(function(id){ return uid+'/'+id+'.jpg'; }));
+      }).then(function(r){ if(!r || !r.error){ meta.del = []; saveMeta(); } }).catch(function(){});
+    } else if(meta.del.length){ meta.del = []; }
+    var got = 0;
+    ids.forEach(function(id){
+      chain = chain.then(function(){ return getBlob(id).catch(function(){ return null; }); }).then(function(blob){
+        var path = uid+'/'+id+'.jpg';
+        if(blob){
+          if(meta.up[id]) return;
+          return bucket.upload(path, blob, { upsert:true, contentType:'image/jpeg' }).then(function(r){
+            if(!r.error){ meta.up[id] = 1; saveMeta(); }
+          });
+        }
+        return bucket.download(path).then(function(r){
+          if(r.error || !r.data) return;
+          return putPhoto(id, r.data).then(function(){ meta.up[id] = 1; got++; saveMeta(); });
+        });
+      }).catch(function(){});
+    });
+    return chain.then(function(){
+      Object.keys(meta.up).forEach(function(id){ if(ids.indexOf(id)===-1) delete meta.up[id]; });
+      saveMeta();
+      if(got) hydratePhotos();
+    });
+  }
+
+  /* ----- the sync itself ----- */
+  function syncNow(){
+    if(!sb || !sbUser) return;
+    if(syncBusy){ syncAgain = true; return; }
+    syncBusy = true; lastPull = Date.now();
+    var seen = changes;
+    syncState = 'busy'; showSync();
+    sb.from('app_state').select('data').maybeSingle().then(function(r){
+      if(r.error) throw r.error;
+      var remote = r.data && r.data.data;
+      if(!remote) return pushState();
+      var first = meta.uid!==sbUser.id || !meta.linked;
+      var merged = mergeStates(state, remote, first);
+      var sm = sig(merged);
+      if(sm !== sig(state)) adopt(merged);
+      if(sm !== sig(remote)){ state.updatedAt = Date.now(); saveLocal(); return pushState(); }
+      state.updatedAt = +remote.updatedAt || state.updatedAt; saveLocal();
+    }).then(function(){
+      meta.uid = sbUser.id; meta.linked = true; meta.at = Date.now();
+      meta.dirty = changes!==seen;
+      saveMeta();
+      return syncPhotos();
+    }).then(function(){
+      syncState = 'idle';
+    }).catch(function(){
+      syncState = 'error';
+    }).then(function(){
+      syncBusy = false; showSync();
+      if(syncAgain || (meta.dirty && syncState==='idle')){ syncAgain = false; scheduleSync(); }
+    });
+  }
+  function scheduleSync(){
+    if(!sbUser) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncNow, 1500);
+  }
+  function markDirty(){
+    changes++;
+    if(meta.uid && !meta.dirty){ meta.dirty = true; saveMeta(); }
+    if(sbUser && !syncBusy) showSync();
+    scheduleSync();
+  }
+  function login(){
+    var email = $('#sync-email').value.trim(), pass = $('#sync-pass').value;
+    if(!email || !pass){ setSyncText('Вкажи пошту і пароль.'); return; }
+    meta.email = email;
+    setSyncText('Входжу…');
+    initSb().then(function(){
+      return sb.auth.signInWithPassword({ email:email, password:pass });
+    }).then(function(r){
+      if(r.error || !r.data || !r.data.user){ setSyncText('Не вдалося увійти. Перевір пошту й пароль.'); return; }
+      sbUser = r.data.user;
+      if(meta.uid!==sbUser.id){ meta.uid = sbUser.id; meta.linked = false; meta.at = 0; meta.up = {}; meta.del = []; }
+      saveMeta(); syncText = ''; refreshSyncBox(); syncNow();
+    }).catch(function(){ setSyncText('Не вдалося з’єднатися із сервером. Перевір інтернет.'); });
+  }
+  function logout(){
+    var done = function(){
+      sbUser = null; syncText = ''; syncState = 'idle';
+      meta.uid = ''; meta.linked = false; meta.dirty = false; saveMeta();
+      refreshSyncBox();
+    };
+    if(sb) sb.auth.signOut().then(done, done); else done();
+  }
+  /* runs on every start of the app */
+  function startSync(){
+    if(!meta.uid) return;
+    initSb().then(function(){ return sb.auth.getSession(); }).then(function(r){
+      var ses = r && r.data && r.data.session;
+      if(ses && ses.user){ sbUser = ses.user; refreshSyncBox(); syncNow(); }
+      else { meta.uid = ''; meta.linked = false; saveMeta(); refreshSyncBox(); }
+    }).catch(function(){});
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='visible' && sbUser && Date.now()-lastPull > 10000) syncNow();
+  });
 
   /* ---------- products ---------- */
   var foodQuery = '';
@@ -475,7 +984,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
 
   /* ---------- sheet ---------- */
-  var VIEWS = ['pick','amtview','scanview','remoteview','newform'];
+  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
   /* while the sheet is open the page behind it is pinned, so only the sheet scrolls (iOS Safari) */
   var lockY = 0, locked = false;
@@ -495,7 +1004,11 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     window.scrollTo(0, lockY);
   }
   function openOverlay(){ lockPage(); $('#overlay').classList.add('open'); }
-  function closeSheet(){ stopScan(); $('#overlay').classList.remove('open'); unlockPage(); }
+  function closeSheet(){
+    stopScan(); $('#overlay').classList.remove('open'); unlockPage();
+    /* photos picked in a measurement form that was closed without saving */
+    if(mNew && mNew.length){ mNew.forEach(delPhoto); mNew = []; }
+  }
 
   function renderPick(){
     var list = matchFoods($('#f-search').value);
@@ -782,7 +1295,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     }
     var item = (editId && findFood(editId)) || { id:uid() };
     var isNew = !findFood(item.id);
-    item.name = name; item.kcal = kcal; item.p = p; item.c = c; item.f = f;
+    item.name = name; item.kcal = kcal; item.p = p; item.c = c; item.f = f; item.u = Date.now();
     if(formKind==='dish'){
       item.basis = 'portion';
       item.servings = servings();
@@ -801,7 +1314,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
         });
         if(hit){
           var dt = sum(d.ingredients.map(ingVals)), ds = d.servings>0 ? d.servings : 1;
-          d.kcal = dt.kcal/ds; d.p = dt.p/ds; d.c = dt.c/ds; d.f = dt.f/ds;
+          d.kcal = dt.kcal/ds; d.p = dt.p/ds; d.c = dt.c/ds; d.f = dt.f/ds; d.u = Date.now();
         }
       });
     }
@@ -839,8 +1352,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(!item) return;
     if(!(v.a>0)){ $('#amt-err').textContent = item.basis==='100g' ? 'Вкажи, скільки грамів.' : 'Вкажи, скільки порцій.'; return; }
     var name = item.basis==='100g' ? baseName(item)+', '+fmt(v.a)+' г' : (v.a===1 ? item.name : item.name+' × '+fmt(v.a));
-    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:v.kcal, p:v.p, c:v.c, f:v.f });
-    item.lastAmount = v.a;
+    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:v.kcal, p:v.p, c:v.c, f:v.f, u:Date.now() });
+    item.lastAmount = v.a; item.u = Date.now();
     state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==item.id; }));
     save(); closeSheet(); render();
   }
@@ -881,11 +1394,20 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(t.id==='f-save'){ saveFood(); return; }
     if(t.id==='f-del'){
       if(!armedDel){ armedDel = true; t.textContent = 'Точно видалити?'; return; }
+      tomb(editId);
       state.foods = state.foods.filter(function(x){ return x.id!==editId; });
       save(); closeSheet(); render(); return;
     }
     if(t.id==='f-cancel' || t.id==='scan-back' || t.id==='rem-back' || t.id==='f-back' || t.id==='overlay'){ closeSheet(); return; }
 
+    if(t.id==='viewer' || t.id==='viewer-img'){ closeViewer(); return; }
+    if(t.dataset && t.dataset.view && t.tagName==='IMG'){ openViewer(t.dataset.view); return; }
+    if(t.id==='m-save'){ saveMeasure(); return; }
+    if(t.id==='m-back'){ closeSheet(); return; }
+    if(t.id==='m-del'){
+      if(!armedMDel){ armedMDel = true; t.textContent = 'Точно видалити?'; return; }
+      deleteMeasure(); return;
+    }
     var b = t.closest('[data-act]');
     if(!b) return;
     var act = b.dataset.act;
@@ -893,11 +1415,22 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     else if(act==='next'){ if(day<iso(new Date())){ day = shift(day,1); render(); } }
     else if(act==='add'){ openSheet(b.dataset.meal); }
     else if(act==='newfood'){ openForm(null, 'food'); }
+    else if(act==='login'){ login(); }
+    else if(act==='logout'){ logout(); }
+    else if(act==='syncnow'){ syncNow(); }
+    else if(act==='newmeasure'){ openMeasure(null); }
+    else if(act==='editmeasure'){ openMeasure(findMeasure(b.dataset.id)); }
+    else if(act==='delphoto'){
+      mPhotos = mPhotos.filter(function(x){ return x!==b.dataset.id; });
+      if(mNew.indexOf(b.dataset.id)!==-1){ mNew = mNew.filter(function(x){ return x!==b.dataset.id; }); delPhoto(b.dataset.id); }
+      renderMPhotos();
+    }
     else if(act==='newdish'){ openForm(null, 'dish'); }
     else if(act==='scan'){ startScan(); }
     else if(act==='remote'){ openRemote(); }
     else if(act==='deling'){ dishRows.splice(+b.dataset.i, 1); renderDishRows(); }
     else if(act==='del'){
+      tomb(b.dataset.id);
       state.entries = state.entries.filter(function(e){ return e.id!==b.dataset.id; });
       save(); render();
     }
@@ -918,13 +1451,15 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
         if(!s || !Array.isArray(s.entries)) throw new Error('bad');
         state.entries = s.entries;
         state.foods = foodsFrom(s);
-        state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0}, s.goal||{}); recalc();
+        state.measures = measuresFrom(s);
+        state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, s.goal||{}); syncWeight();
         save(); render();
         $('#iomsg').textContent = 'Дані відновлено.';
       }catch(e){ msg2.textContent = 'Не вдалося прочитати текст. Встав його повністю, як скопіював.'; }
     }
     else if(act==='reset'){
       if(!armedReset){ armedReset = true; render(); return; }
+      state.entries.forEach(function(e){ tomb(e.id); });
       state.entries = []; armedReset = false;
       save(); render();
       $('#iomsg').textContent = 'Усі записи видалено.';
@@ -932,12 +1467,13 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   });
 
   document.addEventListener('change', function(ev){
+    if(ev.target.id==='m-file'){ if(ev.target.files && ev.target.files.length) addPhotos(Array.prototype.slice.call(ev.target.files)); ev.target.value = ''; return; }
     if(ev.target.dataset && ev.target.dataset.usda){ state.usdaKey = ev.target.value.trim(); save(); return; }
     var k = ev.target.dataset && ev.target.dataset.goal;
     if(k){
       var v = num(ev.target.value);
-      if(v>0){ state.goal[k] = v; recalc(); save(); }
-      ev.target.value = k==='weight' ? (state.goal.weight>0 ? state.goal.weight : '') : r(state.goal[k]);
+      if(v>0){ state.goal[k] = v; state.goal.u = Date.now(); recalc(); save(); }
+      ev.target.value = k==='kcal' ? r(state.goal.kcal) : (state.goal[k]>0 ? state.goal[k] : '');
       var c = $('#calc'); if(c) c.innerHTML = calcHTML();
     }
   });
@@ -959,18 +1495,21 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   });
 
   document.addEventListener('keydown', function(ev){
-    if(ev.key==='Escape'){ closeSheet(); return; }
+    if(ev.key==='Escape'){ if($('#viewer').classList.contains('open')) closeViewer(); else closeSheet(); return; }
     if(ev.key!=='Enter' || ev.target.tagName!=='INPUT') return;
     var id = ev.target.id;
     if(id==='rem-q'){ $('#rem-go').click(); }
     else if(id==='scan-manual'){ $('#scan-go').click(); }
+    else if(id==='sync-pass' || id==='sync-email'){ login(); }
     else if(id==='amt-val'){ addFood(); }
+    else if(!$('#mform').hidden && id!=='m-file' && $('#overlay').classList.contains('open')){ saveMeasure(); }
     else if(!$('#newform').hidden && id!=='ing-search' && $('#overlay').classList.contains('open')){ saveFood(); }
   });
 
   load();
-  recalc();
+  syncWeight();
   render();
+  startSync();
 })();
 </script>
 </body>
