@@ -15,7 +15,7 @@
 :root{
   --bg:#F3F4F7; --surface:#FFFFFF; --ink:#101828; --muted:#667085; --line:#E4E7EC;
   --accent:#2F4BFF; --accent-ink:#FFFFFF; --track:#E4E7EC; --warn:#E5484D;
-  --p:#E5484D; --c:#F5A524; --f:#17A398;
+  --p:#E5484D; --c:#F5A524; --f:#17A398; --note:#475467;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -25,14 +25,14 @@
   :root:not([data-theme="light"]){
     --bg:#0E1116; --surface:#171B22; --ink:#F2F4F7; --muted:#98A2B3; --line:#262C36;
     --accent:#7C8CFF; --accent-ink:#0E1116; --track:#262C36; --warn:#FF6B70;
-    --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD;
+    --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD; --note:#B9C0CC;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0E1116; --surface:#171B22; --ink:#F2F4F7; --muted:#98A2B3; --line:#262C36;
   --accent:#7C8CFF; --accent-ink:#0E1116; --track:#262C36; --warn:#FF6B70;
-  --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD;
+  --p:#FF6B70; --c:#FFBE4D; --f:#3CC9BD; --note:#B9C0CC;
   color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
@@ -50,39 +50,55 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .navbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1}
 .navbtn[disabled]{opacity:.35;cursor:default}
 
-/* ring */
-.hero{background:var(--surface);border-radius:28px;padding:20px 16px 18px;margin-bottom:12px}
-.ringwrap{position:relative;width:220px;height:220px;margin:0 auto}
+/* hero */
+.hero{background:var(--surface);border-radius:24px;padding:16px;margin-bottom:12px}
+.herotop{display:flex;align-items:center;gap:16px}
+.ringwrap{width:108px;height:108px;flex:none}
 .ringwrap svg{width:100%;height:100%;display:block}
-.ring-track{fill:none;stroke:var(--track);stroke-width:14}
-.ring-bar{fill:none;stroke:var(--accent);stroke-width:14;stroke-linecap:round}
+.ring-track{fill:none;stroke:var(--track);stroke-width:18}
+.ring-bar{fill:none;stroke:var(--accent);stroke-width:18;stroke-linecap:round}
 .ring-bar.over{stroke:var(--warn)}
-.ringcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.bignum{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;font-size:44px;letter-spacing:-.02em;line-height:1}
+.heronum{min-width:0}
+.bignum{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;font-size:36px;letter-spacing:-.02em;line-height:1}
 .bignum.over{color:var(--warn)}
-.ringcenter span{color:var(--muted);font-size:14px;margin-top:6px}
-.ringsub{display:flex;justify-content:center;gap:28px;margin-top:14px;color:var(--muted);font-size:14px}
-.ringsub b{display:block;color:var(--ink);font-size:17px;font-weight:600}
-.ringsub div{text-align:center}
+.herolbl{color:var(--muted);font-size:14px;margin-top:6px}
+.herosub{color:var(--muted);font-size:14px;margin-top:4px}
+.herosub b{color:var(--ink);font-weight:600}
 
 /* macros */
-.macros{background:var(--surface);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:grid;gap:12px}
-.mac .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
-.mac .top span:last-child{color:var(--muted)}
-.bar{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:4px}
+.macs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.mac{min-width:0}
+.mac .ml{font-size:13px;color:var(--muted)}
+.mac .mv{font-size:14px;font-weight:600;margin:2px 0 6px;white-space:nowrap}
+.mac .mh{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap}
+.mac .mh.over{color:var(--warn)}
+.bar{height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
 
 /* meals */
-.meal{background:var(--surface);border-radius:20px;padding:6px 16px 10px;margin-bottom:12px}
-.mhead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0 4px}
-.mhead h2{margin:0;font-size:16px;font-weight:600}
+.meal{background:var(--surface);border-radius:20px;padding:4px 16px;margin-bottom:10px;overflow:hidden}
+.mhead{display:flex;align-items:center;gap:10px;padding:8px 0}
+.mhead h2{flex:1;margin:0;font-size:16px;font-weight:600}
 .mhead span{color:var(--muted);font-size:14px}
+.plus{position:relative;width:32px;height:32px;flex:none;border-radius:50%;border:0;padding:0;background:var(--accent);color:var(--accent-ink);font-size:22px;line-height:1}
+.plus::after{content:'';position:absolute;inset:-6px}
+.swipe{position:relative;overflow:hidden;border-top:1px solid var(--line);margin:0 -16px}
+.swdel{position:absolute;top:0;right:0;bottom:0;width:96px;border:0;background:var(--warn);color:#fff;font-weight:600;visibility:hidden;transition:visibility 0s .18s}
+.swipe.on .swdel{visibility:visible;transition:none}
+.erow{position:relative;display:flex;align-items:center;gap:10px;width:100%;border:0;background:var(--surface);padding:10px 16px;text-align:left;touch-action:pan-y;transition:transform .18s}
+.erow.drag{transition:none}
+.erow .rname,.erow .rname small{display:block}
 .row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .rname{flex:1;min-width:0;font-weight:500;overflow-wrap:anywhere}
 .rname small{display:block;color:var(--muted);font-weight:400;font-size:13px}
 .rk{font-weight:600;white-space:nowrap}
 .del{width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1}
-.addbtn{width:100%;margin-top:6px;padding:10px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--accent);font-weight:600}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.sheet .chip{background:var(--bg)}
+.sheet .chip[aria-pressed="true"]{background:var(--accent)}
 
 /* sheet */
 .overlay{position:fixed;inset:0;background:rgba(10,12,16,.5);display:none;align-items:flex-end;z-index:20;overscroll-behavior:contain;touch-action:none}
@@ -121,9 +137,10 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* tabs */
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,0px);z-index:10}
-.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
-.tab{border:0;background:transparent;padding:12px 0;border-radius:12px;font-weight:500;font-size:14px;color:var(--muted);white-space:nowrap}
-.tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg)}
+.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;padding:6px 0 5px;border-radius:14px;font-weight:500;font-size:11px;color:var(--muted);white-space:nowrap}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg);background:color-mix(in srgb,var(--accent) 13%,transparent)}
 
 /* week */
 .panel{background:var(--surface);border-radius:20px;padding:16px;margin-bottom:12px}
@@ -146,7 +163,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 .btnrow{display:flex;gap:8px;margin-top:8px}
 .btnrow button{flex:1;border:1px solid var(--line);background:var(--bg);padding:11px;border-radius:12px;font-weight:500}
 .btnrow .danger{color:var(--warn)}
-.note{color:var(--muted);font-size:13px;margin:8px 0 0}
+.note{color:var(--note);font-size:14px;margin:8px 0 0}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 .mrec{padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
 .panel h2 + .mrec{border-top:0;padding-top:4px}
@@ -175,6 +192,39 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 .viewer img{max-width:100%;max-height:100%;object-fit:contain}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--f);vertical-align:middle}
 .dot.warn{background:var(--c)}
+.dayhead h1.plain{text-transform:none}
+.seg.s3{grid-template-columns:repeat(3,1fr)}
+.seg.s4{grid-template-columns:repeat(4,1fr)}
+.seg.s4 button{font-size:13px;padding:9px 0}
+.stat small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.stat small.good{color:var(--f)}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .ar{fill:var(--accent);opacity:.14}
+.chart .pt{fill:var(--accent);stroke:var(--surface);stroke-width:2.5}
+.mval{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 8px;margin-bottom:8px}
+.mval b{font-family:'Unbounded',system-ui,sans-serif;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.mval span{color:var(--muted);font-size:14px}
+.kcalbig{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.kcalbig input{width:150px;font-family:'Unbounded',system-ui,sans-serif;font-weight:700;font-size:34px;letter-spacing:-.02em;line-height:1.1;padding:0 0 2px;border:0;border-bottom:1px dashed var(--muted);border-radius:0;background:transparent}
+.kcalbig span{color:var(--muted);font-size:14px}
+.norm{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.norm b{display:block;font-family:'Unbounded',system-ui,sans-serif;font-size:20px;font-weight:500}
+.norm span{color:var(--muted);font-size:13px}
+.panel.list{padding:2px 16px}
+.lrow{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:transparent;padding:14px 0;text-align:left}
+.lrow:first-child{border-top:0}
+.lrow .ln{flex:1;min-width:0;font-weight:500}
+.lrow .ln small{display:block;color:var(--muted);font-weight:400;font-size:13px;margin-top:1px}
+.lrow .ch{color:var(--muted);font-size:22px;line-height:1}
+.amtbig{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:4px 0 10px}
+.amtbig input{width:150px;text-align:center;font-family:'Unbounded',system-ui,sans-serif;font-weight:700;font-size:34px;letter-spacing:-.02em;line-height:1.1;padding:2px 0 4px;border:0;border-bottom:2px solid var(--line);border-radius:0;background:transparent}
+.amtbig span{color:var(--muted);font-size:16px;min-width:44px}
+.amtsum{text-align:center;font-weight:500;min-height:22px;margin:0 0 6px}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom,0px));max-width:448px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 14px;display:none;align-items:center;gap:12px;z-index:40;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.open{display:flex}
+.toast.top{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}
+.toast span{flex:1;min-width:0}
+.toast button{flex:none;border:0;background:transparent;color:inherit;font-weight:600;text-decoration:underline;padding:6px 2px}
 </style>
 </head>
 <body>
@@ -184,11 +234,10 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
 
 <nav class="tabbar" aria-label="Розділи">
   <div>
-    <button class="tab" data-view="today">Сьогодні</button>
-    <button class="tab" data-view="week">Тиждень</button>
-    <button class="tab" data-view="foods">Продукти</button>
-    <button class="tab" data-view="measures">Заміри</button>
-    <button class="tab" data-view="settings">Ціль</button>
+    <button class="tab" data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></svg>Сьогодні</button>
+    <button class="tab" data-view="week"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/></svg>Тиждень</button>
+    <button class="tab" data-view="measures"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.875 12c.621 0 1.125.512 1.125 1.143v5.714c0 .631-.504 1.143-1.125 1.143H4a1 1 0 0 1-1-1v-5.857C3 12.512 3.504 12 4.125 12z"/><path d="M9 12v2"/><path d="M6 12v3"/><path d="M12 12v3"/><path d="M18 12v3"/><path d="M15 12v2"/><path d="M3 3v4"/><path d="M3 5h18"/><path d="M21 3v4"/></svg>Заміри</button>
+    <button class="tab" data-view="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>Налаштування</button>
   </div>
 </nav>
 
@@ -200,15 +249,17 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     <div id="pick">
       <label class="field"><span>Пошук серед збережених</span><input id="f-search" type="text" autocomplete="off" placeholder="Почни вводити назву"></label>
       <div class="drop" id="plist"></div>
-      <button class="second" id="f-goto" style="margin-top:0">Відкрити «Продукти»</button>
+      <button class="second" id="f-goto" style="margin-top:0">Керувати продуктами</button>
       <button class="ghost" id="f-cancel">Закрити</button>
     </div>
     <div id="amtview" hidden>
-      <p class="note" id="amt-info" style="margin:0 0 10px"></p>
-      <label class="field"><span id="amt-label">Скільки грамів</span><input id="amt-val" type="text" inputmode="decimal" autocomplete="off"></label>
-      <p class="note" id="amt-total" role="status" style="margin:0 0 10px"></p>
-      <p class="err" id="amt-err"></p>
+      <div class="amtbig"><input id="amt-val" type="text" inputmode="decimal" autocomplete="off" aria-label="Кількість"><span id="amt-unit">г</span></div>
+      <div class="chips" id="amt-chips" style="justify-content:center"></div>
+      <p class="amtsum" id="amt-total" role="status"></p>
+      <p class="note" id="amt-info" style="margin:0 0 6px;text-align:center"></p>
+      <p class="err" id="amt-err" style="text-align:center"></p>
       <button class="primary" id="amt-add">Додати</button>
+      <button class="danger-ghost" id="amt-del" hidden>Видалити запис</button>
       <button class="ghost" id="amt-back">Назад до списку</button>
     </div>
     <div id="mform" hidden>
@@ -270,8 +321,27 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       <button class="danger-ghost" id="f-del" hidden>Видалити продукт</button>
       <button class="ghost" id="f-back">Закрити</button>
     </div>
+    <div id="syncview" hidden>
+      <div id="syncbox"></div>
+      <button class="ghost" id="sync-back">Закрити</button>
+    </div>
+    <div id="backupview" hidden>
+      <p class="note" style="margin-top:0">Текстова копія всіх даних, крім фото. Скопіюй її і збережи в нотатках як запасний варіант.</p>
+      <textarea id="io" spellcheck="false" aria-label="Дані у форматі JSON" style="margin-top:10px"></textarea>
+      <div class="btnrow"><button data-act="export">Показати й скопіювати</button><button data-act="import">Відновити з тексту</button></div>
+      <p class="note" id="iomsg" role="status"></p>
+      <div class="btnrow"><button class="danger" id="reset-btn" data-act="reset">Видалити всі записи</button></div>
+      <button class="ghost" id="bk-back">Закрити</button>
+    </div>
+    <div id="usdaview" hidden>
+      <label class="field"><span>Власний ключ API (необов’язково)</span><input type="text" id="usda-key" data-usda="1" autocomplete="off" autocapitalize="off"></label>
+      <p class="note" style="margin:0 0 10px">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup. Ключ зберігається одразу.</p>
+      <button class="ghost" id="usda-back">Закрити</button>
+    </div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-undo">Скасувати</button></div>
 
 <script>
 (function(){
@@ -301,6 +371,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       var name = String(x.name);
       var o = { id:x.id||uid(), name:name, kcal:+x.kcal||0, p:+x.p||0, c:+x.c||0, f:+x.f||0 };
       if(+x.lastAmount>0) o.lastAmount = +x.lastAmount;
+      if(+x.lastUsed>0) o.lastUsed = +x.lastUsed;
       if(+x.u>0) o.u = +x.u;
       /* basis: older data has no field; names ending with ", 100 г" came from the bases per 100 g */
       o.basis = (x.basis==='100g' || x.basis==='portion') ? x.basis : (/100\s*г\s*$/i.test(name) ? '100g' : 'portion');
@@ -357,9 +428,11 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   function calcHTML(){
     var g = state.goal;
     if(!(g.weight>0)) return '<p class="note" style="margin:0">Вкажи вагу, і норму білків, жирів та вуглеводів буде розраховано автоматично.</p>';
-    var h = '<div class="row" style="border-top:0"><div class="rname">Білки<small>'+fmtN(g.pPerKg)+' г на кг</small></div><div class="rk">'+r(g.p)+' г</div></div>'
-      + '<div class="row"><div class="rname">Жири<small>1 г на кг</small></div><div class="rk">'+r(g.f)+' г</div></div>'
-      + '<div class="row"><div class="rname">Вуглеводи<small>решта калорій</small></div><div class="rk">'+r(g.c)+' г</div></div>';
+    var h = '<div class="norm">'
+      + '<div><b style="color:var(--p)">'+r(g.p)+' г</b><span>Білки</span></div>'
+      + '<div><b style="color:var(--c)">'+r(g.c)+' г</b><span>Вуглеводи</span></div>'
+      + '<div><b style="color:var(--f)">'+r(g.f)+' г</b><span>Жири</span></div></div>'
+      + '<p class="note">Білки '+fmtN(g.pPerKg)+' г на кг, жири 1 г на кг, решта калорій у вуглеводи.</p>';
     if(g.kcal < g.p*4 + g.f*9) h += '<p class="err" style="margin-top:10px">Калорій замало: білки й жири для цієї ваги вже дають '+r(g.p*4+g.f*9)+' ккал. Збільш денну ціль.</p>';
     return h;
   }
@@ -379,12 +452,40 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     return esc(long);
   }
 
+  var MON =['січ.','лют.','бер.','квіт.','трав.','черв.','лип.','серп.','вер.','жовт.','лист.','груд.'];
+  function shortDate(s){
+    var d = parseIso(s);
+    return d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear() ? ' '+d.getFullYear() : '');
+  }
+
+  /* theme: kept on this device only, not synced */
+  var THEME_KEY = 'kalorii:theme', theme = 'auto';
+  try{ var th0 = localStorage.getItem(THEME_KEY); if(th0==='light' || th0==='dark') theme = th0; }catch(e){}
+  function applyTheme(){
+    var el = document.documentElement;
+    if(theme==='auto') el.removeAttribute('data-theme'); else el.setAttribute('data-theme', theme);
+  }
+  applyTheme();
+
+  /* toast with an optional undo */
+  var toastTimer = null, toastUndo = null;
+  function hideToast(){ clearTimeout(toastTimer); toastUndo = null; $('#toast').classList.remove('open'); }
+  function toast(text, undo){
+    $('#toast-text').textContent = text;
+    toastUndo = undo || null;
+    $('#toast-undo').hidden = !undo;
+    $('#toast').classList.toggle('top', $('#overlay').classList.contains('open'));
+    $('#toast').classList.add('open');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 6000);
+  }
+
   /* ---------- views ---------- */
   function todayHTML(){
     var es = dayEntries(day), t = sum(es), g = state.goal;
-    var left = g.kcal - t.kcal, over = left < 0;
+    var left = g.kcal - t.kcal, over = r(left) < 0;
     var pct = g.kcal>0 ? Math.min(t.kcal/g.kcal, 1) : 0;
-    var C = 2*Math.PI*88;
+    var C = 2*Math.PI*45;
     var today = iso(new Date());
 
     var h = '<div class="dayhead">'
@@ -392,77 +493,151 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       + '<h1>'+dayLabel(day)+'</h1>'
       + '<button class="navbtn" data-act="next" aria-label="Наступний день"'+(day>=today?' disabled':'')+'>›</button>'
       + '</div>';
-
-    h += '<section class="hero" aria-label="Калорії за день">'
-      + '<div class="ringwrap"><svg viewBox="0 0 200 200" aria-hidden="true">'
-      + '<circle class="ring-track" cx="100" cy="100" r="88"/>'
-      + '<circle class="ring-bar'+(over?' over':'')+'" cx="100" cy="100" r="88" transform="rotate(-90 100 100)" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pct)).toFixed(1)+'"/>'
-      + '</svg><div class="ringcenter"><div class="bignum'+(over?' over':'')+'">'+Math.abs(r(left))+'</div><span>'+(over?'ккал понад ціль':'ккал залишилось')+'</span></div></div>'
-      + '<div class="ringsub"><div><b>'+r(t.kcal)+'</b>з’їдено</div><div><b>'+r(g.kcal)+'</b>ціль</div></div>'
-      + '</section>';
+    if(day!==today) h += '<div style="text-align:center;margin:-6px 0 12px"><button class="chip" data-act="today">Повернутися на сьогодні</button></div>';
 
     function mac(label, val, goal, color){
-      var w = goal>0 ? Math.min(val/goal*100,100) : 0;
-      return '<div class="mac"><div class="top"><span>'+label+'</span><span>'+r(val)+' / '+r(goal)+' г</span></div>'
-        + '<div class="bar"><i style="width:'+w.toFixed(1)+'%;background:'+color+'"></i></div></div>';
+      var w = goal>0 ? Math.min(val/goal*100,100) : 0, d = r(val)-r(goal);
+      var hint = !(goal>0) ? '' : d>0 ? '<div class="mh over">+'+d+' г понад</div>' : d<0 ? '<div class="mh">ще '+(-d)+' г</div>' : '<div class="mh">норму виконано</div>';
+      return '<div class="mac"><div class="ml">'+label+'</div><div class="mv">'+r(val)+' / '+r(goal)+'</div>'
+        + '<div class="bar"><i style="width:'+w.toFixed(1)+'%;background:'+(d>0 && goal>0 ? 'var(--warn)' : color)+'"></i></div>'+hint+'</div>';
     }
-    h += '<section class="macros" aria-label="Білки, вуглеводи, жири">'
+    h += '<section class="hero" aria-label="Калорії за день"><div class="herotop">'
+      + '<div class="ringwrap"><svg viewBox="0 0 108 108" aria-hidden="true">'
+      + '<circle class="ring-track" cx="54" cy="54" r="45"/>'
+      + (pct>0 ? '<circle class="ring-bar'+(over?' over':'')+'" cx="54" cy="54" r="45" transform="rotate(-90 54 54)" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pct)).toFixed(1)+'"/>' : '')
+      + '</svg></div>'
+      + '<div class="heronum"><div class="bignum'+(over?' over':'')+'">'+(over?'+':'')+Math.abs(r(left))+'</div>'
+      + '<div class="herolbl">'+(over?'ккал понад ціль':'ккал залишилось')+'</div>'
+      + '<div class="herosub">з’їдено <b>'+r(t.kcal)+'</b> · ціль <b>'+r(g.kcal)+'</b></div></div></div>'
+      + '<div class="macs" aria-label="Білки, вуглеводи, жири, грами">'
       + mac('Білки', t.p, g.p, 'var(--p)') + mac('Вуглеводи', t.c, g.c, 'var(--c)') + mac('Жири', t.f, g.f, 'var(--f)')
-      + '</section>';
+      + '</div></section>';
+
+    if(!state.foods.length && !state.entries.length){
+      h += '<section class="panel"><h2>Почни з першого продукту</h2>'
+        + '<p class="note" style="margin:0 0 12px">Додай продукт зі своїми значеннями або знайди його за штрихкодом. Потім додавай його в прийоми їжі кнопкою «+».</p>'
+        + '<button class="primary" style="margin-top:0" data-act="newfood">Додати продукт</button>'
+        + '<button class="second" data-act="scan">Сканувати штрихкод</button></section>';
+    }
 
     var groups = MEALS.slice();
     if(es.some(function(e){ return mealKey(e.meal)==='other'; })) groups.push(['other','Без прийому']);
     groups.forEach(function(m){
       var list = es.filter(function(e){ return mealKey(e.meal)===m[0]; });
       var k = sum(list).kcal;
-      h += '<section class="meal"><div class="mhead"><h2>'+m[1]+'</h2><span>'+(list.length? r(k)+' ккал' : '')+'</span></div>';
+      h += '<section class="meal"><div class="mhead"><h2>'+m[1]+'</h2><span>'+(list.length? r(k)+' ккал' : '')+'</span>'
+        + (m[0]!=='other' ? '<button class="plus" data-act="add" data-meal="'+m[0]+'" aria-label="Додати в «'+m[1].toLowerCase()+'»">+</button>' : '')
+        + '</div>';
       list.forEach(function(e){
-        h += '<div class="row"><div class="rname">'+esc(e.name)
-          + '<small>Б '+r(e.p)+' г, В '+r(e.c)+' г, Ж '+r(e.f)+' г</small></div>'
-          + '<div class="rk">'+r(e.kcal)+'</div>'
-          + '<button class="del" data-act="del" data-id="'+esc(e.id)+'" aria-label="Видалити '+esc(e.name)+'">×</button></div>';
+        h += '<div class="swipe"><button class="swdel" data-act="del" data-id="'+esc(e.id)+'" tabindex="-1" aria-label="Видалити '+esc(e.name)+'">Видалити</button>'
+          + '<button class="erow" data-act="editentry" data-id="'+esc(e.id)+'"><span class="rname">'+esc(e.name)
+          + '<small>Б '+r(e.p)+' г, В '+r(e.c)+' г, Ж '+r(e.f)+' г</small></span>'
+          + '<span class="rk">'+r(e.kcal)+'</span></button></div>';
       });
-      if(m[0]!=='other') h += '<button class="addbtn" data-act="add" data-meal="'+m[0]+'">Додати в «'+m[1].toLowerCase()+'»</button>';
       h += '</section>';
     });
     return h;
   }
 
+  /* ---------- week ---------- */
+  var weekOff = 0, weekMetric = 'kcal';
+  var WM = [['kcal','Калорії','var(--accent)'],['p','Білки','var(--p)'],['c','Вуглеводи','var(--c)'],['f','Жири','var(--f)']];
+  /* weeks run Monday to Sunday; off = how many weeks back */
+  function weekStart(off){
+    var d = new Date();
+    d.setDate(d.getDate() - (d.getDay()+6)%7 - 7*off);
+    return iso(d);
+  }
+  function weekDays(off){
+    var s = weekStart(off), today = iso(new Date()), out = [];
+    for(var i=0;i<7;i++){ var d = shift(s,i); out.push({ d:d, future:d>today, t:sum(dayEntries(d)) }); }
+    return out;
+  }
+  function weekStats(days){
+    var logged = days.filter(function(x){ return x.t.kcal>0; }), n = logged.length;
+    return {
+      n: n,
+      avg: n ? logged.reduce(function(a,x){ return a+x.t.kcal; },0)/n : 0,
+      avgP: n ? logged.reduce(function(a,x){ return a+x.t.p; },0)/n : 0,
+      inGoal: logged.filter(function(x){ return x.t.kcal<=state.goal.kcal; }).length
+    };
+  }
+  function weightAt(d){
+    var list = sortedMeasures();
+    for(var i=0;i<list.length;i++){ if(list[i].weight>0 && list[i].date<=d) return list[i]; }
+    return null;
+  }
+  function rangeLabel(a, b){
+    var da = parseIso(a), db = parseIso(b), o = {day:'numeric', month:'long'};
+    var end = db.toLocaleDateString('uk-UA', o);
+    return da.getMonth()===db.getMonth() ? da.getDate()+'–'+end : da.toLocaleDateString('uk-UA', o)+' – '+end;
+  }
   function weekHTML(){
     var today = iso(new Date()), g = state.goal;
-    var days = [];
-    for(var i=6;i>=0;i--){ var d = shift(today,-i); days.push({d:d, t:sum(dayEntries(d))}); }
-    var max = Math.max(g.kcal*1.15, Math.max.apply(null, days.map(function(x){return x.t.kcal;})), 1);
+    var start = weekStart(weekOff), end = shift(start,6);
+    var days = weekDays(weekOff), st = weekStats(days), prev = weekStats(weekDays(weekOff+1));
+    var M = WM[0];
+    WM.forEach(function(x){ if(x[0]===weekMetric) M = x; });
+    var key = M[0], goal = +g[key]||0, unit = key==='kcal' ? '' : ' г';
+    var max = Math.max(goal*1.15, Math.max.apply(null, days.map(function(x){return x.t[key];})), 1);
     var W=320, H=180, base=146, top=22, bw=30, step=(W-16)/7;
-    var svg = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Калорії за останні 7 днів">';
-    var gy = base - g.kcal/max*(base-top);
-    svg += '<line class="gl" x1="4" x2="'+(W-4)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'"/>';
-    svg += '<text class="tx" x="'+(W-4)+'" y="'+(gy-5).toFixed(1)+'" text-anchor="end">ціль '+r(g.kcal)+'</text>';
+    var svg = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+M[1]+' за тиждень">';
+    if(goal>0){
+      var gy = base - goal/max*(base-top);
+      svg += '<line class="gl" x1="4" x2="'+(W-4)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'"/>';
+      svg += '<text class="tx" x="'+(W-4)+'" y="'+(gy-5).toFixed(1)+'" text-anchor="end">ціль '+r(goal)+unit+'</text>';
+    }
     days.forEach(function(x,i){
+      var v = x.t[key];
       var cx = 8 + step*i + step/2;
-      var h = x.t.kcal/max*(base-top);
-      var cls = x.t.kcal===0 ? 'b zero' : (x.t.kcal>g.kcal ? 'b over' : 'b');
-      var bh = x.t.kcal===0 ? 3 : Math.max(h,3);
-      svg += '<rect class="'+cls+'" x="'+(cx-bw/2).toFixed(1)+'" y="'+(base-bh).toFixed(1)+'" width="'+bw+'" height="'+bh.toFixed(1)+'" rx="6"/>';
-      if(x.t.kcal>0) svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base-bh-5).toFixed(1)+'" text-anchor="middle">'+r(x.t.kcal)+'</text>';
+      var bh = v===0 ? 3 : Math.max(v/max*(base-top),3);
+      var cls = v===0 ? 'b zero' : (key==='kcal' && v>goal ? 'b over' : 'b');
+      var fill = (v>0 && key!=='kcal') ? ' style="fill:'+M[2]+'"' : '';
+      svg += '<rect class="'+cls+'"'+fill+' x="'+(cx-bw/2).toFixed(1)+'" y="'+(base-bh).toFixed(1)+'" width="'+bw+'" height="'+bh.toFixed(1)+'" rx="6"/>';
+      if(v>0) svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base-bh-5).toFixed(1)+'" text-anchor="middle">'+r(v)+'</text>';
       var wd = parseIso(x.d).toLocaleDateString('uk-UA',{weekday:'short'});
-      svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base+18)+'" text-anchor="middle">'+esc(wd)+'</text>';
+      svg += '<text class="tx" x="'+cx.toFixed(1)+'" y="'+(base+18)+'" text-anchor="middle"'+(x.d===today?' style="fill:var(--ink);font-weight:600"':'')+'>'+esc(wd)+'</text>';
     });
     svg += '</svg>';
 
-    var logged = days.filter(function(x){ return x.t.kcal>0; });
-    var avg = logged.length ? logged.reduce(function(a,x){return a+x.t.kcal;},0)/logged.length : 0;
-    var inGoal = logged.filter(function(x){ return x.t.kcal<=g.kcal; }).length;
+    var sub = weekOff===0 ? 'цей тиждень' : weekOff===1 ? 'минулий тиждень' : '';
+    var h = '<div class="dayhead">'
+      + '<button class="navbtn" data-act="wprev" aria-label="Попередній тиждень">‹</button>'
+      + '<h1 class="plain">'+esc(rangeLabel(start,end))+(sub?'<small>'+sub+'</small>':'')+'</h1>'
+      + '<button class="navbtn" data-act="wnext" aria-label="Наступний тиждень"'+(weekOff<=0?' disabled':'')+'>›</button></div>';
+    h += '<section class="panel"><div class="seg s4">'
+      + WM.map(function(x){ return '<button data-act="wmetric" data-v="'+x[0]+'" aria-pressed="'+(x[0]===key)+'">'+x[1]+'</button>'; }).join('')
+      + '</div>'+svg+'</section>';
 
-    var h = '<div class="dayhead"><h1>Останні 7 днів</h1></div>';
-    h += '<section class="panel">'+svg+'</section>';
+    function delta(d, good){
+      if(!d) return '<small>як минулого тижня</small>';
+      return '<small'+(good?' class="good"':'')+'>'+(d>0?'+':'−')+Math.abs(d)+' до минулого тижня</small>';
+    }
+    var both = st.n && prev.n;
     h += '<section class="panel"><div class="stats">'
-      + '<div class="stat"><b>'+(logged.length? r(avg) : '—')+'</b><span>середнє за дні із записами, ккал</span></div>'
-      + '<div class="stat"><b>'+inGoal+' з '+logged.length+'</b><span>днів у межах цілі</span></div>'
-      + '</div></section>';
+      + '<div class="stat"><b>'+(st.n? r(st.avg) : '—')+'</b><span>середнє за день, ккал</span>'
+      + (both ? delta(r(st.avg)-r(prev.avg), Math.abs(st.avg-g.kcal) < Math.abs(prev.avg-g.kcal)) : '')+'</div>'
+      + '<div class="stat"><b>'+st.inGoal+' з '+st.n+'</b><span>днів у межах цілі</span>'
+      + (both ? delta(st.inGoal-prev.inGoal, st.inGoal>prev.inGoal) : '')+'</div>'
+      + '<div class="stat"><b>'+(st.n? r(st.avgP)+' г' : '—')+'</b><span>середній білок</span><small>ціль '+r(g.p)+' г</small></div>';
+    var wr = weightAt(end<today ? end : today);
+    if(wr){
+      h += '<div class="stat"><b>'+fmtN(wr.weight)+' кг</b><span>'+(weekOff===0?'вага зараз':'вага на кінець тижня')+'</span>';
+      if(wr.date>=start){
+        var pw = weightAt(shift(start,-1));
+        if(pw){
+          var dw = Math.round((wr.weight-pw.weight)*10)/10;
+          h += '<small>'+(dw===0 ? 'без змін' : (dw>0?'+':'−')+fmtN(Math.abs(dw)))+' за тиждень</small>';
+        }
+      } else h += '<small>запис від '+esc(shortDate(wr.date))+'</small>';
+      h += '</div>';
+    }
+    h += '</div></section>';
     h += '<section class="panel daylist"><h2>По днях</h2>';
     days.slice().reverse().forEach(function(x){
-      var label = parseIso(x.d).toLocaleDateString('uk-UA',{weekday:'long', day:'numeric', month:'long'});
+      if(x.future) return;
+      var dt = parseIso(x.d);
+      var label = dt.toLocaleDateString('uk-UA',{weekday:'long'})+', '+dt.getDate();
       h += '<div class="row"><button class="rname" data-act="goto" data-day="'+x.d+'">'+esc(label)+'</button><div class="rk">'+(x.t.kcal? r(x.t.kcal)+' ккал' : '—')+'</div></div>';
     });
     h += '</section>';
@@ -470,37 +645,43 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
 
   function settingsHTML(){
-    var g = state.goal;
+    var g = state.goal, lw = latestWeight();
     function inp(key,label,val){ return '<label class="field"><span>'+label+'</span><input type="text" inputmode="decimal" data-goal="'+key+'" value="'+val+'"></label>'; }
-    var h = '<div class="dayhead"><h1>Ціль і дані</h1></div>';
-    h += '<section class="panel"><h2>Денна ціль</h2><div class="sgrid">'
-      + (latestWeight()
-          ? '<div class="field"><span>Вага, кг</span><div class="static">'+fmtN(g.weight)+'</div></div>'
-          : inp('weight','Вага, кг', g.weight>0 ? g.weight : ''))
-      + inp('kcal','Калорії, ккал', r(g.kcal))
-      + inp('pPerKg','Білок, г на кг ваги', g.pPerKg>0 ? g.pPerKg : 2)
-      + '</div><p class="note">'+(latestWeight() ? 'Вага береться з найновішого запису у вкладці «Заміри». ' : 'Вагу можна вказати тут або записувати у вкладці «Заміри». ')
-      + 'Білок рахується за твоїм значенням на кг ваги, жир 1 г на кг, решта калорій іде у вуглеводи. Зміни зберігаються одразу.</p></section>'
-      + '<section class="panel"><h2>Норма БЖВ</h2><div id="calc">'+calcHTML()+'</div></section>';
-    h += syncHTML();
-    h += '<section class="panel"><h2>База продуктів USDA</h2>'
-      + '<label class="field"><span>Власний ключ API (необов’язково)</span><input type="text" id="usda-key" data-usda="1" autocomplete="off" autocapitalize="off" value="'+esc(state.usdaKey||'')+'"></label>'
-      + '<p class="note" style="margin:0">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup.</p></section>';
-    h += '<section class="panel"><h2>Резервна копія</h2>'
-      + '<p class="note" style="margin-top:0">Текстова копія всіх даних, крім фото. Скопіюй її і збережи в нотатках як запасний варіант.</p>'
-      + '<textarea id="io" spellcheck="false" aria-label="Дані у форматі JSON"></textarea>'
-      + '<div class="btnrow"><button data-act="export">Показати й скопіювати</button><button data-act="import">Відновити з тексту</button></div>'
-      + '<p class="note" id="iomsg" role="status"></p>'
-      + '<div class="btnrow"><button class="danger" data-act="reset">'+(armedReset?'Точно видалити все?':'Видалити всі записи')+'</button></div>'
+    function lrow(act, name, sub){
+      return '<button class="lrow" data-act="'+act+'"><span class="ln">'+name+(sub?'<small>'+sub+'</small>':'')+'</span><span class="ch" aria-hidden="true">›</span></button>';
+    }
+    var h = '<div class="dayhead"><h1>Налаштування</h1></div>';
+    h += '<section class="panel"><h2>Денна ціль</h2>'
+      + '<label class="kcalbig"><input type="text" inputmode="numeric" data-goal="kcal" value="'+r(g.kcal)+'" aria-label="Калорії на день"><span>ккал на день</span></label>'
+      + '<div class="sgrid">'
+      + (lw ? '<div class="field"><span>Вага, кг</span><div class="static">'+fmtN(g.weight)+'</div></div>'
+            : inp('weight','Вага, кг', g.weight>0 ? g.weight : ''))
+      + inp('pPerKg','Білок, г на кг', g.pPerKg>0 ? g.pPerKg : 2)
+      + '</div><p class="note" style="margin-top:0">'+(lw ? 'Вага береться з найновішого запису в «Замірах». ' : 'Вагу можна вказати тут або записати в «Замірах». ')
+      + 'Зміни зберігаються одразу.</p></section>'
+      + '<section class="panel"><h2>Норма на день</h2><div id="calc">'+calcHTML()+'</div></section>';
+    h += '<section class="panel list">'
+      + lrow('opensync', 'Синхронізація', '<span id="sync-short">'+syncShortHTML()+'</span>')
+      + lrow('openbackup', 'Резервна копія', 'текстова копія даних, відновлення')
+      + lrow('openusda', 'База USDA', state.usdaKey ? 'власний ключ API' : 'загальний ключ з лімітом')
+      + lrow('openfoods', 'Продукти', state.foods.length ? 'збережено: '+state.foods.length : 'ще немає')
       + '</section>';
+    h += '<section class="panel"><h2>Тема</h2><div class="seg s3" style="margin:0">'
+      + [['auto','Авто'],['light','Світла'],['dark','Темна']].map(function(x){
+          return '<button data-act="theme" data-v="'+x[0]+'" aria-pressed="'+(theme===x[0])+'">'+x[1]+'</button>';
+        }).join('')
+      + '</div></section>';
     if(!storageOk) h += '<p class="err">Браузер не дозволяє зберігати дані, тому після закриття вони зникнуть.</p>';
     return h;
   }
 
+  var foodsBack = 'settings';
   function render(){
+    var cur = view==='foods' ? foodsBack : view;
     document.querySelectorAll('.tab').forEach(function(b){
-      b.setAttribute('aria-current', b.dataset.view===view ? 'page' : 'false');
+      b.setAttribute('aria-current', b.dataset.view===cur ? 'page' : 'false');
     });
+    swOpen = null;
     var m = $('#main');
     m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML() : settingsHTML();
     hydratePhotos(m);
@@ -536,9 +717,64 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     recalc();
   }
   function findMeasure(id){ var it = null; state.measures.forEach(function(x){ if(x.id===id) it = x; }); return it; }
+  var mMetric = 'weight', mPeriod = '90';
+  var MP = [['30','30 днів'],['90','90 днів'],['365','Рік'],['all','Усе']];
+  function measureChartHTML(){
+    var f = MF[0];
+    MF.forEach(function(x){ if(x[0]===mMetric) f = x; });
+    var k = f[0], today = iso(new Date());
+    var from = mPeriod==='all' ? '' : shift(today, -(+mPeriod));
+    var pts = state.measures.filter(function(m){ return m[k]>0 && m.date>=from; })
+      .map(function(m){ return { d:m.date, v:m[k] }; })
+      .sort(function(a,b){ return a.d<b.d ? -1 : a.d>b.d ? 1 : 0; });
+    var h = '<section class="panel"><div class="chips">'
+      + [MF[0],MF[3],MF[1],MF[2],MF[4]].map(function(x){ return '<button class="chip" data-act="mmetric" data-v="'+x[0]+'" aria-pressed="'+(x[0]===k)+'">'+x[1]+'</button>'; }).join('')
+      + '</div>';
+    if(!pts.length){
+      h += '<p class="note" style="margin:0 0 12px">'+(state.measures.some(function(m){ return m[k]>0; }) ? 'За цей період записів немає. Обери довший період.' : 'Записів із цим заміром ще немає.')+'</p>';
+    } else {
+      var first = pts[0], last = pts[pts.length-1];
+      var ch = '';
+      if(pts.length>1){
+        var d = Math.round((last.v-first.v)*10)/10;
+        ch = '<span>'+(d===0 ? 'без змін' : (d>0?'+':'−')+fmtN(Math.abs(d))+' '+f[2])+' за період</span>';
+      } else ch = '<span>один запис за період</span>';
+      h += '<div class="mval"><b>'+fmtN(last.v)+'</b><span>'+f[2]+'</span>'+ch+'</div>';
+      var W=320, H=150, pl=8, pr=10, top=12, base=120;
+      var t0 = parseIso(first.d).getTime(), t1 = parseIso(last.d).getTime();
+      var lo = Math.min.apply(null, pts.map(function(p){ return p.v; })), hi = Math.max.apply(null, pts.map(function(p){ return p.v; }));
+      var pad = hi>lo ? (hi-lo)*0.15 : 1;
+      lo -= pad; hi += pad;
+      var xy = pts.map(function(p){
+        var x = t1===t0 ? W/2 : pl + (parseIso(p.d).getTime()-t0)/(t1-t0)*(W-pl-pr);
+        var y = base - (p.v-lo)/(hi-lo)*(base-top);
+        return [x, y];
+      });
+      var line = xy.map(function(p,i){ return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); }).join(' ');
+      var lx = xy[xy.length-1];
+      var svg = '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+f[1]+': графік за період">';
+      if(xy.length>1){
+        svg += '<path class="ar" d="'+line+' L'+lx[0].toFixed(1)+' '+base+' L'+xy[0][0].toFixed(1)+' '+base+' Z"/>'
+          + '<path class="ln" d="'+line+'"/>';
+      }
+      svg += '<circle class="pt" cx="'+lx[0].toFixed(1)+'" cy="'+lx[1].toFixed(1)+'" r="5"/>';
+      if(xy.length>1){
+        svg += '<text class="tx" x="'+pl+'" y="'+(H-8)+'">'+esc(shortDate(first.d))+'</text>'
+          + '<text class="tx" x="'+(W-pr)+'" y="'+(H-8)+'" text-anchor="end">'+esc(shortDate(last.d))+'</text>';
+      } else {
+        svg += '<text class="tx" x="'+(W/2)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(shortDate(last.d))+'</text>';
+      }
+      h += svg + '</svg>';
+    }
+    h += '<div class="seg s4" style="margin:8px 0 0">'
+      + MP.map(function(x){ return '<button data-act="mperiod" data-v="'+x[0]+'" aria-pressed="'+(x[0]===mPeriod)+'">'+x[1]+'</button>'; }).join('')
+      + '</div></section>';
+    return h;
+  }
   function measuresHTML(){
     var list = sortedMeasures();
     var h = '<div class="dayhead"><h1>Заміри</h1></div>';
+    if(list.length) h += measureChartHTML();
     h += '<section class="panel"><button class="primary" style="margin-top:0" data-act="newmeasure">Новий запис</button>'
       + '<p class="note">Вага з найновішого запису використовується для розрахунку цілі.</p></section>';
     h += '<section class="panel"><h2>Історія</h2>';
@@ -546,7 +782,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     list.forEach(function(m, i){
       var prev = null;
       for(var j=i+1;j<list.length && m.weight>0;j++){ if(list[j].weight>0){ prev = list[j]; break; } }
-      var date = parseIso(m.date).toLocaleDateString('uk-UA',{day:'numeric', month:'long', year:'numeric'});
+      var date = shortDate(m.date);
       var w = '';
       if(m.weight>0){
         w = fmtN(m.weight)+' кг';
@@ -792,7 +1028,19 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     return sbLoading;
   }
 
-  /* ----- status shown in the «Ціль» tab ----- */
+  /* ----- status shown in «Налаштування» (short) and in the sync sheet (full) ----- */
+  function syncShortHTML(){
+    if(!sbUser) return meta.uid ? 'перевіряю вхід…' : 'не ввімкнено';
+    if(syncState==='busy') return '<i class="dot warn"></i>синхронізую…';
+    if(syncState==='error') return '<i class="dot warn"></i>немає зв’язку із сервером';
+    if(meta.dirty) return '<i class="dot warn"></i>є незбережені зміни';
+    var t = '';
+    if(meta.at){
+      var d = new Date(meta.at);
+      t = ', '+(iso(d)===iso(new Date()) ? '' : shortDate(iso(d))+', ')+d.toLocaleTimeString('uk-UA',{hour:'2-digit', minute:'2-digit'});
+    }
+    return '<i class="dot"></i>синхронізовано'+t;
+  }
   function syncStatusHTML(){
     if(!sbUser) return esc(syncText);
     var last = meta.at ? ' Востаннє: ' + new Date(meta.at).toLocaleString('uk-UA',{day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'}) + '.' : '';
@@ -801,25 +1049,29 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(meta.dirty) return '<i class="dot warn"></i>Є зміни, ще не збережені на сервері.' + last;
     return '<i class="dot"></i>Синхронізовано.' + last;
   }
-  function showSync(){ var el = $('#sync-msg'); if(el) el.innerHTML = syncStatusHTML(); }
+  function showSync(){
+    var el = $('#sync-msg'); if(el) el.innerHTML = syncStatusHTML();
+    var sh = $('#sync-short'); if(sh) sh.innerHTML = syncShortHTML();
+  }
   function setSyncText(t){ syncText = t; showSync(); }
   function syncHTML(){
-    var h = '<section class="panel" id="syncbox"><h2>Синхронізація</h2>';
+    var h = '<div id="syncbox">';
     if(sbUser){
       h += '<p class="note" style="margin-top:0">Увійшов як '+esc(sbUser.email||'')+'. Дані й фото зберігаються на сервері автоматично: після кожної зміни і щоразу, коли відкриваєш застосунок.</p>'
         + '<div class="btnrow"><button data-act="syncnow">Синхронізувати зараз</button><button data-act="logout">Вийти</button></div>';
     } else {
-      h += '<p class="note" style="margin-top:0">Увійди, щоб записи, продукти, заміри й фото зберігалися на сервері. Дані із сервера й з цього телефона буде об’єднано.</p>'
+      h += '<p class="note" style="margin:0 0 10px">Увійди, щоб записи, продукти, заміри й фото зберігалися на сервері. Дані із сервера й з цього телефона буде об’єднано.</p>'
         + '<label class="field"><span>Пошта</span><input id="sync-email" type="email" autocomplete="username" autocapitalize="off" value="'+esc(meta.email||'')+'"></label>'
         + '<label class="field"><span>Пароль</span><input id="sync-pass" type="password" autocomplete="current-password"></label>'
         + '<div class="btnrow" style="margin-top:0"><button data-act="login">Увійти</button></div>';
     }
-    h += '<p class="note" id="sync-msg" role="status">'+syncStatusHTML()+'</p></section>';
+    h += '<p class="note" id="sync-msg" role="status">'+syncStatusHTML()+'</p></div>';
     return h;
   }
   function refreshSyncBox(){
     var box = $('#syncbox');
     if(box) box.outerHTML = syncHTML();
+    var sh = $('#sync-short'); if(sh) sh.innerHTML = syncShortHTML();
   }
 
   /* ----- merge ----- */
@@ -1015,7 +1267,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     return list.map(function(x){ return foodItem(x,'fitem'); }).join('');
   }
   function foodsHTML(){
-    var h = '<div class="dayhead"><h1>Продукти</h1></div>';
+    var h = '<div class="dayhead"><button class="navbtn" data-act="foodsback" aria-label="Назад">‹</button><h1>Продукти</h1><span style="width:40px"></span></div>';
     h += '<section class="panel"><h2>Додати</h2>'
       + '<button class="primary" style="margin-top:0" data-act="scan">Сканувати штрихкод</button>'
       + '<button class="second" data-act="remote">Шукати в базі</button>'
@@ -1031,7 +1283,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
 
   /* ---------- sheet ---------- */
-  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform'];
+  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform','syncview','backupview','usdaview'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); }
   /* while the sheet is open the page behind it is pinned, so only the sheet scrolls (iOS Safari) */
   var lockY = 0, locked = false;
@@ -1052,28 +1304,42 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
   }
   function openOverlay(){ lockPage(); $('#overlay').classList.add('open'); }
   function closeSheet(){
+    var was = $('#overlay').classList.contains('open');
     stopScan(); $('#overlay').classList.remove('open'); unlockPage();
+    $('#toast').classList.remove('top');
     /* photos picked in a measurement form that was closed without saving */
     if(mNew && mNew.length){ mNew.forEach(delPhoto); mNew = []; }
+    if(was && view==='settings') render();
   }
 
+  var addedCount = 0;
   function renderPick(){
-    var list = matchFoods($('#f-search').value);
+    /* most recently added to a meal first; products never added keep their order */
+    var list = matchFoods($('#f-search').value).map(function(x,i){ return { x:x, i:i }; })
+      .sort(function(a,b){ return ((b.x.lastUsed||0)-(a.x.lastUsed||0)) || (a.i-b.i); })
+      .map(function(o){ return o.x; });
     var box = $('#plist');
     if(!state.foods.length){
-      box.innerHTML = '<p class="note">Продуктів ще немає. Спочатку додай їх у вкладці «Продукти».</p>';
+      box.innerHTML = '<p class="note">Продуктів ще немає. Натисни «Керувати продуктами», щоб додати перший.</p>';
     } else if(!list.length){
-      box.innerHTML = '<p class="note">Нічого не знайдено. Нові продукти додаються у вкладці «Продукти».</p>';
+      box.innerHTML = '<p class="note">Нічого не знайдено. Новий продукт можна додати через «Керувати продуктами».</p>';
     } else {
       box.innerHTML = list.map(function(x){ return foodItem(x,'aitem'); }).join('');
     }
+    var done = $('#f-cancel');
+    done.textContent = addedCount ? 'Готово' : 'Закрити';
+    done.className = addedCount ? 'primary' : 'ghost';
   }
-  function openSheet(meal){
-    sheetMeal = mealKey(meal)==='other' ? 'snack' : meal;
-    $('#f-search').value = '';
+  function showPick(){
     only('pick');
     $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
     renderPick();
+  }
+  function openSheet(meal){
+    sheetMeal = mealKey(meal)==='other' ? 'snack' : meal;
+    addedCount = 0;
+    $('#f-search').value = '';
+    showPick();
     openOverlay();
     if(state.foods.length) setTimeout(function(){ $('#f-search').focus(); }, 50);
   }
@@ -1250,7 +1516,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       }
     }).catch(function(e){
       $('#rem-msg').textContent = e.message==='limit'
-        ? 'Ліміт загального ключа вичерпано. Додай власний безкоштовний ключ USDA у вкладці «Ціль».'
+        ? 'Ліміт загального ключа вичерпано. Додай власний безкоштовний ключ USDA у «Налаштуваннях», рядок «База USDA».'
         : 'Не вдалося звернутися до бази. Перевір інтернет і спробуй ще раз.';
     });
   }
@@ -1368,46 +1634,161 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(isNew) state.foods = [item].concat(state.foods);
     save(); closeSheet(); render();
   }
-  /* amount step: grams for products per 100 g, portions for the rest */
-  var amtFood = null;
+  /* amount step: grams for products per 100 g, portions for the rest.
+     Used both to add a product to a meal and to change the amount of an existing entry. */
+  var amt = null;
   function baseName(x){ return x.name.replace(/,?\s*100\s*г\s*$/i, '') || x.name; }
+  function fmtAmt(a, basis){ return fmt(a).replace('.', ',')+(basis==='100g' ? ' г' : ' порц.'); }
+  function entryName(base, a, basis){ return basis==='100g' ? base+', '+fmt(a)+' г' : (a===1 ? base : base+' × '+fmt(a)); }
+  function findEntry(id){ var it = null; state.entries.forEach(function(e){ if(e.id===id) it = e; }); return it; }
+  /* older entries have no amount field: read it back from the name ("…, 150 г" or "… × 2") */
+  function entryParts(e){
+    var name = String(e.name), m;
+    if(e.amount>0 && (e.basis==='100g' || e.basis==='portion')){
+      return { amount:+e.amount, basis:e.basis,
+               base: (e.basis==='100g' ? name.replace(/,\s*[\d.,]+\s*г\s*$/, '') : name.replace(/\s*×\s*[\d.,]+\s*$/, '')) || name };
+    }
+    if((m = /^(.+),\s*([\d.,]+)\s*г\s*$/.exec(name)) && num(m[2])>0) return { base:m[1], amount:num(m[2]), basis:'100g' };
+    if((m = /^(.+?)\s*×\s*([\d.,]+)\s*$/.exec(name)) && num(m[2])>0) return { base:m[1], amount:num(m[2]), basis:'portion' };
+    return { base:name, amount:1, basis:'portion' };
+  }
   function amtVals(){
-    var a = num($('#amt-val').value);
-    var k = amtFood.basis==='100g' ? a/100 : a;
-    return { a:a, kcal:amtFood.kcal*k, p:amtFood.p*k, c:amtFood.c*k, f:amtFood.f*k };
+    var a = num($('#amt-val').value), p = amt.per;
+    return { a:a, kcal:p.kcal*a, p:p.p*a, c:p.c*a, f:p.f*a };
   }
   function updateAmt(){
     var v = amtVals();
-    $('#amt-total').textContent = v.a ? 'Буде додано: '+r(v.kcal)+' ккал, '+macroLine(v)+'.' : '';
+    $('#amt-total').textContent = v.a ? r(v.kcal)+' ккал · Б '+r(v.p)+' · В '+r(v.c)+' · Ж '+r(v.f) : '';
     $('#amt-err').textContent = '';
+    document.querySelectorAll('.qchip').forEach(function(b){
+      b.setAttribute('aria-pressed', num(b.dataset.q)===v.a ? 'true' : 'false');
+    });
+  }
+  function openAmt(){
+    var g = amt.basis==='100g';
+    $('#sh-title').textContent = amt.base;
+    $('#amt-unit').textContent = g ? 'г' : 'порц.';
+    $('#amt-val').value = fmt(amt.start);
+    $('#amt-info').textContent = amt.info;
+    $('#amt-chips').innerHTML = (g ? ['50','100','150','200'] : ['0.5','1','2','3']).map(function(q){
+      return '<button class="chip qchip" data-q="'+q+'">'+q.replace('.', ',')+(g?' г':'')+'</button>';
+    }).join('');
+    $('#amt-add').textContent = amt.entry ? 'Зберегти' : 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
+    $('#amt-del').hidden = !amt.entry;
+    $('#amt-back').textContent = amt.entry ? 'Закрити' : 'Назад до списку';
+    updateAmt();
+    only('amtview');
   }
   function showAmount(id){
     var x = findFood(id);
     if(!x) return;
-    amtFood = x;
-    var g = x.basis==='100g';
-    $('#sh-title').textContent = baseName(x);
-    $('#amt-info').textContent = (g ? 'На 100 г: ' : 'На порцію: ')+r(x.kcal)+' ккал, '+macroLine(x)+'.';
-    $('#amt-label').textContent = g ? 'Скільки грамів' : 'Скільки порцій';
-    $('#amt-val').value = fmt(x.lastAmount>0 ? x.lastAmount : (g ? 100 : 1));
-    updateAmt();
-    only('amtview');
+    var g = x.basis==='100g', k = g ? 1/100 : 1;
+    amt = { food:x, basis:x.basis, base: g ? baseName(x) : x.name,
+            per:{ kcal:x.kcal*k, p:x.p*k, c:x.c*k, f:x.f*k },
+            start: x.lastAmount>0 ? x.lastAmount : (g ? 100 : 1),
+            info: (x.lastAmount>0 ? 'Минулого разу '+fmtAmt(x.lastAmount, x.basis)+'. ' : '')+(g ? 'На 100 г: ' : 'На порцію: ')+r(x.kcal)+' ккал.' };
+    openAmt();
     setTimeout(function(){ var el = $('#amt-val'); el.focus(); el.select(); }, 50);
   }
-  function addFood(){
-    var item = amtFood, v = amtVals();
-    if(!item) return;
-    if(!(v.a>0)){ $('#amt-err').textContent = item.basis==='100g' ? 'Вкажи, скільки грамів.' : 'Вкажи, скільки порцій.'; return; }
-    var name = item.basis==='100g' ? baseName(item)+', '+fmt(v.a)+' г' : (v.a===1 ? item.name : item.name+' × '+fmt(v.a));
-    state.entries.push({ id:uid(), date:day, meal:sheetMeal, name:name, kcal:v.kcal, p:v.p, c:v.c, f:v.f, u:Date.now() });
-    item.lastAmount = v.a; item.u = Date.now();
-    state.foods = [item].concat(state.foods.filter(function(x){ return x.id!==item.id; }));
-    save(); closeSheet(); render();
+  function editEntry(id){
+    var e = findEntry(id);
+    if(!e) return;
+    var pr = entryParts(e);
+    amt = { entry:e, basis:pr.basis, base:pr.base,
+            per:{ kcal:e.kcal/pr.amount, p:e.p/pr.amount, c:e.c/pr.amount, f:e.f/pr.amount },
+            start:pr.amount, info:'Зміни кількість, і калорії перерахуються.' };
+    openAmt();
+    openOverlay();
   }
+  function commitAmt(){
+    if(!amt) return;
+    var v = amtVals();
+    if(!(v.a>0)){ $('#amt-err').textContent = amt.basis==='100g' ? 'Вкажи, скільки грамів.' : 'Вкажи, скільки порцій.'; return; }
+    var name = entryName(amt.base, v.a, amt.basis);
+    if(amt.entry){
+      var e = amt.entry;
+      e.name = name; e.kcal = v.kcal; e.p = v.p; e.c = v.c; e.f = v.f;
+      e.amount = v.a; e.basis = amt.basis; e.u = Date.now();
+      save(); closeSheet(); render();
+      return;
+    }
+    var item = amt.food;
+    var ne = { id:uid(), date:day, meal:sheetMeal, name:name, kcal:v.kcal, p:v.p, c:v.c, f:v.f, amount:v.a, basis:amt.basis, u:Date.now() };
+    var prevA = item.lastAmount, prevT = item.lastUsed;
+    state.entries.push(ne);
+    item.lastAmount = v.a; item.lastUsed = Date.now(); item.u = Date.now();
+    save(); render();
+    /* the sheet stays open so that several products can be added in a row */
+    addedCount++;
+    $('#f-search').value = '';
+    showPick();
+    toast(name+' додано · '+r(v.kcal)+' ккал', function(){
+      tomb(ne.id);
+      state.entries = state.entries.filter(function(x){ return x.id!==ne.id; });
+      if(prevA>0) item.lastAmount = prevA; else delete item.lastAmount;
+      if(prevT>0) item.lastUsed = prevT; else delete item.lastUsed;
+      item.u = Date.now();
+      save(); render();
+      if($('#overlay').classList.contains('open') && !$('#pick').hidden) renderPick();
+    });
+  }
+  /* deleting an entry can be undone from the toast: the same record comes back with a fresh stamp */
+  function deleteEntry(id){
+    var idx = -1;
+    state.entries.forEach(function(e,i){ if(e.id===id) idx = i; });
+    if(idx<0) return;
+    var e = state.entries[idx];
+    tomb(id);
+    state.entries.splice(idx, 1);
+    save(); render();
+    toast('Запис видалено', function(){
+      delete state.deleted[id];
+      e.u = Date.now();
+      state.entries.splice(Math.min(idx, state.entries.length), 0, e);
+      save(); render();
+    });
+  }
+
+  /* swipe an entry to the left to reveal «Видалити» */
+  var sw = null, swOpen = null, swEnd = 0, SWW = 96;
+  function closeSwipe(){ if(swOpen){ swOpen.style.transform = ''; swOpen.parentNode.classList.remove('on'); swOpen = null; } }
+  $('#main').addEventListener('touchstart', function(ev){
+    var row = ev.target.closest && ev.target.closest('.erow');
+    if(swOpen && swOpen!==row && !(ev.target.closest && ev.target.closest('.swdel'))) closeSwipe();
+    if(!row || ev.touches.length!==1){ sw = null; return; }
+    var t = ev.touches[0];
+    sw = { row:row, x:t.clientX, y:t.clientY, base: row===swOpen ? -SWW : 0, on:false, pos:0 };
+  }, { passive:true });
+  $('#main').addEventListener('touchmove', function(ev){
+    if(!sw) return;
+    var t = ev.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+    if(!sw.on){
+      if(Math.abs(dx)<8 && Math.abs(dy)<8) return;
+      if(Math.abs(dy)>=Math.abs(dx)){ sw = null; return; }
+      sw.on = true; sw.row.classList.add('drag'); sw.row.parentNode.classList.add('on');
+    }
+    sw.pos = Math.max(-SWW, Math.min(0, sw.base + dx));
+    sw.row.style.transform = 'translateX('+sw.pos+'px)';
+  }, { passive:true });
+  function swipeEnd(){
+    if(!sw) return;
+    if(sw.on){
+      sw.row.classList.remove('drag');
+      if(sw.pos < -SWW/2){ sw.row.style.transform = 'translateX(-'+SWW+'px)'; swOpen = sw.row; }
+      else { sw.row.style.transform = ''; sw.row.parentNode.classList.remove('on'); if(swOpen===sw.row) swOpen = null; }
+      swEnd = Date.now();
+    }
+    sw = null;
+  }
+  $('#main').addEventListener('touchend', swipeEnd, { passive:true });
+  $('#main').addEventListener('touchcancel', swipeEnd, { passive:true });
 
   /* ---------- events ---------- */
   document.addEventListener('click', function(ev){
     var t = ev.target;
+    if(t.id==='toast-undo'){ var undo = toastUndo; hideToast(); if(undo) undo(); return; }
+    var qc = t.closest('.qchip');
+    if(qc){ $('#amt-val').value = qc.dataset.q; updateAmt(); return; }
     var tab = t.closest('.tab');
     if(tab){ view = tab.dataset.view; armedReset=false; render(); window.scrollTo(0,0); return; }
 
@@ -1421,7 +1802,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     }
     var bs = t.closest('#f-basis button');
     if(bs){ setBasis(bs.dataset.basis); return; }
-    if(t.id==='f-goto'){ closeSheet(); view = 'foods'; render(); window.scrollTo(0,0); return; }
+    if(t.id==='f-goto'){ closeSheet(); foodsBack = 'today'; view = 'foods'; render(); window.scrollTo(0,0); return; }
     if(t.id==='scan-go'){
       var digits = $('#scan-manual').value.replace(/\D/g,'');
       if(digits.length<8){ $('#scan-msg').textContent = 'Штрихкод має містити щонайменше 8 цифр.'; return; }
@@ -1432,10 +1813,15 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       if(!q){ $('#rem-msg').textContent = 'Введи назву англійською, наприклад chicken breast.'; return; }
       searchRemote(q); return;
     }
-    if(t.id==='amt-add'){ addFood(); return; }
+    if(t.id==='amt-add'){ commitAmt(); return; }
     if(t.id==='amt-back'){
-      only('pick');
-      $('#sh-title').textContent = 'Додати в «'+mealName(sheetMeal).toLowerCase()+'»';
+      if(amt && amt.entry) closeSheet(); else showPick();
+      return;
+    }
+    if(t.id==='amt-del'){
+      var did = amt && amt.entry && amt.entry.id;
+      closeSheet();
+      if(did) deleteEntry(did);
       return;
     }
     if(t.id==='f-save'){ saveFood(); return; }
@@ -1445,7 +1831,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       state.foods = state.foods.filter(function(x){ return x.id!==editId; });
       save(); closeSheet(); render(); return;
     }
-    if(t.id==='f-cancel' || t.id==='scan-back' || t.id==='rem-back' || t.id==='f-back' || t.id==='overlay'){ closeSheet(); return; }
+    if(t.id==='f-cancel' || t.id==='scan-back' || t.id==='rem-back' || t.id==='f-back' || t.id==='sync-back' || t.id==='bk-back' || t.id==='usda-back' || t.id==='overlay'){ closeSheet(); return; }
 
     if(t.id==='viewer-close'){ closeViewer(); return; }
     if(t.id==='viewer-prev'){ stepViewer(-1); return; }
@@ -1479,11 +1865,42 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     else if(act==='scan'){ startScan(); }
     else if(act==='remote'){ openRemote(); }
     else if(act==='deling'){ dishRows.splice(+b.dataset.i, 1); renderDishRows(); }
-    else if(act==='del'){
-      tomb(b.dataset.id);
-      state.entries = state.entries.filter(function(e){ return e.id!==b.dataset.id; });
-      save(); render();
+    else if(act==='del'){ deleteEntry(b.dataset.id); }
+    else if(act==='editentry'){
+      if(Date.now()-swEnd < 400) return;
+      if(swOpen){ closeSwipe(); return; }
+      editEntry(b.dataset.id);
     }
+    else if(act==='today'){ day = iso(new Date()); render(); }
+    else if(act==='wprev'){ weekOff++; render(); }
+    else if(act==='wnext'){ if(weekOff>0){ weekOff--; render(); } }
+    else if(act==='wmetric'){ weekMetric = b.dataset.v; render(); }
+    else if(act==='mmetric'){ mMetric = b.dataset.v; render(); }
+    else if(act==='mperiod'){ mPeriod = b.dataset.v; render(); }
+    else if(act==='theme'){
+      theme = b.dataset.v==='light' || b.dataset.v==='dark' ? b.dataset.v : 'auto';
+      try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+      applyTheme(); render();
+    }
+    else if(act==='opensync'){
+      refreshSyncBox();
+      $('#sh-title').textContent = 'Синхронізація';
+      only('syncview'); openOverlay();
+    }
+    else if(act==='openbackup'){
+      armedReset = false;
+      $('#reset-btn').textContent = 'Видалити всі записи';
+      $('#io').value = ''; $('#iomsg').textContent = '';
+      $('#sh-title').textContent = 'Резервна копія';
+      only('backupview'); openOverlay();
+    }
+    else if(act==='openusda'){
+      $('#usda-key').value = state.usdaKey || '';
+      $('#sh-title').textContent = 'База USDA';
+      only('usdaview'); openOverlay();
+    }
+    else if(act==='openfoods'){ foodsBack = 'settings'; view = 'foods'; render(); window.scrollTo(0,0); }
+    else if(act==='foodsback'){ view = foodsBack; render(); window.scrollTo(0,0); }
     else if(act==='goto'){ day = b.dataset.day; view='today'; render(); window.scrollTo(0,0); }
     else if(act==='export'){
       var ta = $('#io'), msg = $('#iomsg');
@@ -1508,9 +1925,10 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
       }catch(e){ msg2.textContent = 'Не вдалося прочитати текст. Встав його повністю, як скопіював.'; }
     }
     else if(act==='reset'){
-      if(!armedReset){ armedReset = true; render(); return; }
+      if(!armedReset){ armedReset = true; b.textContent = 'Точно видалити все?'; return; }
       state.entries.forEach(function(e){ tomb(e.id); });
       state.entries = []; armedReset = false;
+      b.textContent = 'Видалити всі записи';
       save(); render();
       $('#iomsg').textContent = 'Усі записи видалено.';
     }
@@ -1557,7 +1975,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:10px;border-radius:12
     if(id==='rem-q'){ $('#rem-go').click(); }
     else if(id==='scan-manual'){ $('#scan-go').click(); }
     else if(id==='sync-pass' || id==='sync-email'){ login(); }
-    else if(id==='amt-val'){ addFood(); }
+    else if(id==='amt-val'){ commitAmt(); }
     else if(!$('#mform').hidden && id!=='m-file' && $('#overlay').classList.contains('open')){ saveMeasure(); }
     else if(!$('#newform').hidden && id!=='ing-search' && $('#overlay').classList.contains('open')){ saveFood(); }
   });
