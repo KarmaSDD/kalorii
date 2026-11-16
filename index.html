@@ -163,7 +163,7 @@ label.field:not(.nopen)::after,.kcalbig::after,.amtbig::after{content:'';positio
 
 /* tabs */
 .tabbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,0px);z-index:10}
-.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.tabbar div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;padding:6px 0 5px;border-radius:14px;font-weight:500;font-size:11px;color:var(--muted);white-space:nowrap}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .tab[aria-current="page"]{color:var(--accent);font-weight:600;background:var(--bg);background:color-mix(in srgb,var(--accent) 13%,transparent)}
@@ -260,6 +260,58 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
 .exq{flex:none;color:var(--muted);font-size:13px;white-space:nowrap}
 .exn{flex:none;font-weight:600;white-space:nowrap}
 .pen{flex:none;width:16px;height:16px;background:var(--muted);-webkit-mask:var(--i-pencil) center/contain no-repeat;mask:var(--i-pencil) center/contain no-repeat}
+:root{--i-grip:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M9 5v.01M9 12v.01M9 19v.01M15 5v.01M15 12v.01M15 19v.01'/%3E%3C/svg%3E")}
+.cyhead{display:flex;align-items:baseline;gap:8px}
+.cyhead b{flex:1;min-width:0;font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.cyhead span{flex:none;color:var(--muted);font-size:13px}
+.wks{display:flex;gap:5px;margin-top:12px}
+.wk{flex:1;min-width:0;height:34px;border:0;border-radius:8px;padding:0;background:var(--track);color:var(--muted);font-size:13px;font-weight:500}
+.wk.past{background:var(--f);color:var(--accent-ink)}
+.wk.cur{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.wk.sel{outline:2px solid var(--ink);outline-offset:2px}
+.wk:disabled{cursor:default}
+.drow{position:relative;display:flex;align-items:center;gap:4px;border-top:1px solid var(--line);background:var(--surface);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.drow:first-child{border-top:0}
+.dmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;padding:12px 0;text-align:left}
+div.dmain{cursor:default}
+.dnum{font-style:normal;width:30px;height:30px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:var(--track);color:var(--muted)}
+.dnum.ok{background:var(--f);color:var(--accent-ink)}
+.dnum.ok::before{content:'';width:16px;height:16px;background:currentColor;-webkit-mask:var(--i-check) center/contain no-repeat;mask:var(--i-check) center/contain no-repeat}
+.dnum.next{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--acc-text)}
+.dnum.todo{background:transparent;border:1.5px dashed var(--dis-line)}
+.dtx{flex:1;min-width:0}
+.dtx b{display:block;font-size:15px;font-weight:600}
+.dtx small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dtx.off b{color:var(--muted)}
+.drow .ch{flex:none;color:var(--muted);font-size:22px;line-height:1;padding:0 4px}
+.grip{position:relative;flex:none;width:38px;height:48px;margin-right:-8px;border:0;padding:0;background:transparent;cursor:grab;touch-action:none}
+.grip::before{content:'';position:absolute;inset:0;margin:auto;width:20px;height:20px;background:var(--muted);-webkit-mask:var(--i-grip) center/contain no-repeat;mask:var(--i-grip) center/contain no-repeat}
+.drow.lift{z-index:2;border-top-color:transparent;border-radius:12px;box-shadow:0 0 0 1.5px var(--accent),0 8px 20px rgba(0,0,0,.28)}
+.drow.lift .grip::before{background:var(--acc-text)}
+.drow.drop{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.wsub{flex:none;width:40px;text-align:right;color:var(--muted);font-size:13px;white-space:nowrap}
+.srow{display:grid;grid-template-columns:18px minmax(0,1fr) 70px 58px 40px;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.srow.hd{border-top:0;padding:0 0 5px;font-size:11px;color:var(--muted);text-align:center}
+.srow.hd span:nth-child(2){text-align:left}
+.srow .sn,.srow .sl{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow input{width:100%;height:40px;text-align:center;font-size:16px;font-weight:600;padding:0;border-radius:10px;border:1.5px solid var(--fld);background:var(--bg);color:var(--ink)}
+.srow input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)}
+.srow.ok input{border-color:var(--line);color:var(--muted)}
+.srow.now input{border-color:var(--accent)}
+.srow.now .sn{color:var(--ink);font-weight:600}
+.srow.now .sl{color:var(--ink)}
+.sck{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--dis-line);background:transparent;color:var(--dis-line);padding:0;display:flex;align-items:center;justify-content:center}
+.sck::before{content:'';width:18px;height:18px;background:currentColor;-webkit-mask:var(--i-check) center/contain no-repeat;mask:var(--i-check) center/contain no-repeat}
+.srow.ok .sck{background:var(--f);border-color:var(--f);color:var(--accent-ink)}
+.srow.now .sck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.excol{display:flex;align-items:center;gap:8px;width:100%;border:0;background:var(--surface);border-radius:20px;padding:14px 16px;margin-bottom:12px;text-align:left}
+.excol .ch{flex:none;color:var(--muted);font-size:22px;line-height:1;transform:rotate(90deg)}
+.tiles{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tiles span{font-size:14px;padding:5px 10px;border-radius:8px;background:var(--bg)}
+.wkbig{font-family:'Unbounded',system-ui,sans-serif;font-size:26px;font-weight:500;text-align:center;margin:6px 0 0}
+.wdots{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:18px 0 0}
+.stay{width:100%;border:0;background:transparent;color:var(--acc-text);font-weight:600;padding:12px;font-size:15px}
+.chip.go{padding:7px 12px;font-size:13px;border-color:var(--accent);color:var(--acc-text);background:color-mix(in srgb,var(--accent) 16%,transparent);font-weight:600}
 </style>
 </head>
 <body>
@@ -271,8 +323,9 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
   <div>
     <button class="tab" data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></svg>Сьогодні</button>
     <button class="tab" data-view="week"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/></svg>Тиждень</button>
+    <button class="tab" data-view="train"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h1"/><path d="M6 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/><path d="M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M9 12h6"/><path d="M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1z"/><path d="M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><path d="M22 12h-1"/></svg>Тренування</button>
     <button class="tab" data-view="measures"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.875 12c.621 0 1.125.512 1.125 1.143v5.714c0 .631-.504 1.143-1.125 1.143H4a1 1 0 0 1-1-1v-5.857C3 12.512 3.504 12 4.125 12z"/><path d="M9 12v2"/><path d="M6 12v3"/><path d="M12 12v3"/><path d="M18 12v3"/><path d="M15 12v2"/><path d="M3 3v4"/><path d="M3 5h18"/><path d="M21 3v4"/></svg>Заміри</button>
-    <button class="tab" data-view="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>Налаштування</button>
+    <button class="tab" data-view="settings" aria-label="Налаштування"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>Ще</button>
   </div>
 </nav>
 
@@ -385,6 +438,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
       <button class="danger-ghost" id="ex-del">Видалити вправу</button>
       <button class="ghost" id="ex-back">Закрити</button>
     </div>
+    <div id="weekview" hidden></div>
   </div>
 </div>
 
@@ -711,7 +765,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
       + '<section class="panel"><h2>Норма на день</h2><div id="calc">'+calcHTML()+'</div></section>';
     h += '<section class="panel list">'
       + lrow('opencycles', 'Цикл тренувань', '')
-      + lrow('opensync', 'Синхронізація', '<span id="sync-short">'+syncShortHTML()+'</span>')
+      + '<button class="lrow" data-act="opensync"><span class="ln">Синхронізація</span><span class="exq" id="sync-short">'+syncShortHTML()+'</span><span class="ch" aria-hidden="true">›</span></button>'
       + lrow('openbackup', 'Резервна копія', 'текстова копія даних, відновлення')
       + lrow('openusda', 'База USDA', state.usdaKey ? 'власний ключ API' : 'загальний ключ з лімітом')
       + lrow('openfoods', 'Продукти', state.foods.length ? 'збережено: '+state.foods.length : 'ще немає')
@@ -727,13 +781,14 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
 
   var foodsBack = 'settings';
   function render(){
-    var cur = view==='foods' ? foodsBack : (view==='cycles' || view==='cycle' || view==='cday') ? 'settings' : view;
+    var cur = view==='foods' ? foodsBack : (view==='cycles' || view==='cycle' || view==='cday') ? 'settings' : (view==='workout' || view==='wdone') ? 'train' : view;
     document.querySelectorAll('.tab').forEach(function(b){
       b.setAttribute('aria-current', b.dataset.view===cur ? 'page' : 'false');
     });
     swOpen = null;
     var m = $('#main');
     m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML()
+      : view==='train' ? trainHTML() : view==='workout' ? workoutHTML() : view==='wdone' ? wdoneHTML()
       : view==='cycles' ? cyclesHTML() : view==='cycle' ? cycleHTML() : view==='cday' ? cdayHTML() : settingsHTML();
     hydratePhotos(m);
     refreshGates();
@@ -1084,15 +1139,11 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
   /* ----- status shown in «Налаштування» (short) and in the sync sheet (full) ----- */
   function syncShortHTML(){
     if(!sbUser) return meta.uid ? 'перевіряю вхід…' : 'не ввімкнено';
-    if(syncState==='busy') return '<i class="dot warn"></i>синхронізую…';
-    if(syncState==='error') return '<i class="dot warn"></i>немає зв’язку із сервером';
-    if(meta.dirty) return '<i class="dot warn"></i>є незбережені зміни';
-    var t = '';
-    if(meta.at){
-      var d = new Date(meta.at);
-      t = ', '+(iso(d)===iso(new Date()) ? '' : shortDate(iso(d))+', ')+d.toLocaleTimeString('uk-UA',{hour:'2-digit', minute:'2-digit'});
-    }
-    return '<i class="dot"></i>синхронізовано'+t;
+    if(syncState==='error') return '<span style="color:var(--warn)">помилка</span>';
+    if(!meta.at) return 'синхронізую…';
+    var d = new Date(meta.at), day = iso(d), today = iso(new Date());
+    var tm = d.toLocaleTimeString('uk-UA',{hour:'2-digit', minute:'2-digit'});
+    return day===today ? 'сьогодні, '+tm : day===shift(today,-1) ? 'вчора, '+tm : esc(shortDate(day));
   }
   function syncStatusHTML(){
     if(!sbUser) return esc(syncText);
@@ -1362,11 +1413,27 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     return list.filter(function(x){ return x && x.id && x.name; }).map(function(x){
       var o = { id:String(x.id), name:String(x.name), weeks:intIn(x.weeks,1,52,6),
                 start: isDate(x.start) ? x.start : iso(new Date()), end: isDate(x.end) ? x.end : '', days:daysFrom(x.days) };
+      o.week = intIn(x.week,1,o.weeks,1);
+      if(Array.isArray(x.ord) && +x.ordW>0){ o.ord = x.ord.map(String); o.ordW = Math.round(+x.ordW); }
       if(+x.u>0) o.u = +x.u;
       return o;
     });
   }
-  function worksFrom(s){ return Array.isArray(s.workouts) ? s.workouts.filter(function(x){ return x && x.id; }) : []; }
+  function worksFrom(s){
+    var list = Array.isArray(s.workouts) ? s.workouts : [];
+    return list.filter(function(x){ return x && x.id && x.cycleId && x.dayId; }).map(function(x){
+      var o = { id:String(x.id), cycleId:String(x.cycleId), week:intIn(x.week,1,52,1), dayId:String(x.dayId),
+                date: isDate(x.date) ? x.date : iso(new Date()), done:!!x.done };
+      o.ex = (Array.isArray(x.ex) ? x.ex : []).filter(function(e){ return e && e.name; }).map(function(e){
+        return { exId:String(e.exId||''), name:String(e.name), eq: EQ.some(function(k){ return k[0]===e.eq; }) ? e.eq : 'body', pr:intIn(e.pr,1,200,10),
+                 sets:(Array.isArray(e.sets) ? e.sets : []).filter(function(t){ return t && typeof t==='object'; }).map(function(t){
+                   return { w: +t.w>0 ? +t.w : 0, r:intIn(t.r,0,999,0), ok:!!t.ok };
+                 }) };
+      });
+      if(+x.u>0) o.u = +x.u;
+      return o;
+    });
+  }
   function findCycle(id){ var it = null; state.cycles.forEach(function(x){ if(x.id===id) it = x; }); return it; }
   function currentCycle(){
     var cur = null;
@@ -1412,7 +1479,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     if(!c){
       /* a new cycle closes the one that was running */
       state.cycles.forEach(function(x){ if(!x.end){ x.end = today; x.u = now; } });
-      c = { id:uid(), start:today, end:'' };
+      c = { id:uid(), start:today, end:'', week:1 };
       state.cycles.push(c);
     }
     c.name = name; c.weeks = d.weeks; c.days = days; c.u = now;
@@ -1595,9 +1662,301 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     closeSheet(); render();
   }
 
+  /* ---------- workouts: the weeks of the current cycle, logging sets, looking back ----------
+     A workout belongs to a cycle, a week and a day of the plan. Days are not tied to the calendar:
+     a day is either done or not, any day that is not done can be started, and the week moves on
+     when every day is done or when the user says so. cycle.week is the current week (from 1);
+     cycle.ord with cycle.ordW keeps the order of days the user set for that one week. */
+  var trWeek = 0, wkCur = null, wkOpen = 0, wkFrom = 'train', wdId = '', armedWk = false;
+  function cyWeek(c){ return intIn(c.week, 1, c.weeks, 1); }
+  function betterWork(a, b){
+    if(!a) return b;
+    if(!!a.done !== !!b.done) return a.done ? a : b;
+    return (+b.u||0) > (+a.u||0) ? b : a;
+  }
+  function findWork(c, week, dayId){
+    var it = null;
+    state.workouts.forEach(function(w){ if(w.cycleId===c.id && w.week===week && w.dayId===dayId) it = betterWork(it, w); });
+    return it;
+  }
+  function workById(id){ var it = null; state.workouts.forEach(function(w){ if(w.id===id) it = w; }); return it; }
+  function dayOrder(c, week){
+    var days = c.days.slice();
+    if(week!==cyWeek(c) || c.ordW!==week || !Array.isArray(c.ord)) return days;
+    var out = [];
+    c.ord.forEach(function(id){ days.forEach(function(d){ if(d.id===id && out.indexOf(d)===-1) out.push(d); }); });
+    days.forEach(function(d){ if(out.indexOf(d)===-1) out.push(d); });
+    return out;
+  }
+  function dayNo(c, week, dayId){ var n = 0; dayOrder(c, week).forEach(function(d, i){ if(d.id===dayId) n = i+1; }); return n; }
+  function okSets(e){ return e.sets.filter(function(s){ return s.ok; }); }
+  /* the last time this exercise was done in the cycle with the same equipment */
+  function lastSets(c, e, exceptId){
+    var best = null, bw = null, key = e.name.toLowerCase();
+    state.workouts.forEach(function(w){
+      if(w.cycleId!==c.id || w.id===exceptId) return;
+      w.ex.forEach(function(x){
+        if(x.eq!==e.eq || !((e.exId && x.exId===e.exId) || x.name.toLowerCase()===key)) return;
+        if(!okSets(x).length) return;
+        if(!bw || w.date>bw.date || (w.date===bw.date && (+w.u||0)>(+bw.u||0))){ bw = w; best = x; }
+      });
+    });
+    return best ? okSets(best) : [];
+  }
+  /* sets that are not ticked yet start from the last result, or from the plan */
+  function fillSets(c, e, exceptId){
+    var last = lastSets(c, e, exceptId);
+    e.sets.forEach(function(s, i){
+      if(s.ok) return;
+      var src = last[i] || last[last.length-1];
+      s.w = src && e.eq!=='body' ? src.w : 0;
+      s.r = src ? src.r : e.pr;
+      delete s.t;
+    });
+  }
+  function buildWork(c, week, day){
+    var w = { id:uid(), cycleId:c.id, week:week, dayId:day.id, date:iso(new Date()), done:false, ex:[] };
+    day.ex.forEach(function(p){
+      var e = { exId:p.id, name:p.name, eq:p.eq, pr:p.reps, sets:[] };
+      for(var i=0;i<p.sets;i++) e.sets.push({ w:0, r:p.reps, ok:false });
+      fillSets(c, e, w.id);
+      w.ex.push(e);
+    });
+    return w;
+  }
+  function setText(s, eq){ return (eq!=='body' && s.w>0 ? fmtN(s.w)+' ' : '')+'× '+s.r; }
+  function setsLine(list, eq){
+    if(!list.length) return '';
+    var same = list.every(function(s){ return s.w===list[0].w; });
+    var reps = list.map(function(s){ return s.r; }).join(', ');
+    if(eq==='body' || (same && !(list[0].w>0))) return '× '+reps;
+    if(same) return fmtN(list[0].w)+' × '+reps;
+    return list.map(function(s){ return setText(s, eq); }).join('; ');
+  }
+  function wkStored(){ return !!wkCur && state.workouts.some(function(w){ return w.id===wkCur.id; }); }
+  /* syncing may have swapped the list for fresh objects, so the record is put back by id */
+  function wkCommit(){
+    if(!wkCur) return;
+    var at = -1;
+    state.workouts.forEach(function(w, i){ if(w.id===wkCur.id) at = i; });
+    if(at<0) state.workouts.push(wkCur); else state.workouts[at] = wkCur;
+    wkCur.u = Date.now();
+    save();
+  }
+  function openWork(w, from){
+    wkCur = w; wkFrom = from; armedWk = false; wkOpen = 0;
+    w.ex.some(function(e, i){ if(e.sets.some(function(s){ return !s.ok; })){ wkOpen = i; return true; } return false; });
+    view = 'workout'; render(); window.scrollTo(0,0);
+  }
+  function startWork(week, dayId){
+    var c = currentCycle(), day = null;
+    if(!c) return;
+    c.days.forEach(function(d){ if(d.id===dayId) day = d; });
+    if(!day) return;
+    var w = findWork(c, week, dayId);
+    if(w && w.done){ wdId = w.id; view = 'wdone'; render(); window.scrollTo(0,0); return; }
+    openWork(w || buildWork(c, week, day), 'train');
+  }
+  function finishWork(){
+    var w = wkCur;
+    if(!w) return;
+    var c = findCycle(w.cycleId), was = !!w.done;
+    w.ex.forEach(function(e){ e.sets = okSets(e).map(function(s){ return { w:s.w, r:s.r, ok:true }; }); });
+    w.done = true;
+    if(!was) w.date = iso(new Date());
+    wkCommit();
+    var msg = 'Тренування збережено';
+    if(c && !was && w.week===cyWeek(c) && c.days.every(function(d){ var x = findWork(c, w.week, d.id); return !!x && x.done; })){
+      if(w.week<c.weeks){
+        c.week = w.week+1; delete c.ord; delete c.ordW; c.u = Date.now(); save();
+        msg = 'Тиждень '+w.week+' завершено';
+      } else msg = 'Цикл пройдено';
+    }
+    wkCur = null;
+    if(was){ wdId = w.id; view = 'wdone'; } else { trWeek = 0; view = 'train'; }
+    render(); window.scrollTo(0,0);
+    toast(msg);
+  }
+
+  function trainHTML(){
+    var c = currentCycle();
+    if(!c){
+      return '<section class="panel"><h2>Циклу тренувань ще немає</h2>'
+        + '<p class="note" style="margin:0 0 12px">Задай тижні, дні та вправи, а потім відмічай тут вагу й повтори.</p>'
+        + '<button class="primary" style="margin-top:0" data-act="newcycle">Створити цикл</button></section>';
+    }
+    var cw = cyWeek(c), vw = trWeek>=1 && trWeek<cw ? trWeek : cw;
+    var h = '<section class="panel"><div class="cyhead"><b>Цикл «'+esc(c.name)+'»</b><span>з '+esc(shortDate(c.start))+'</span></div><div class="wks">';
+    for(var n=1;n<=c.weeks;n++){
+      h += '<button class="wk'+(n<cw?' past':n===cw?' cur':'')+(n===vw && n!==cw?' sel':'')+'" data-act="trweek" data-v="'+n+'" aria-label="Тиждень '+n+'"'
+        + (n===vw?' aria-current="true"':'')+(n>cw+1?' disabled':'')+'>'+n+'</button>';
+    }
+    h += '</div></section>';
+    var days = dayOrder(c, vw);
+    var works = days.map(function(d){ return findWork(c, vw, d.id); });
+    var left = works.filter(function(w){ return !(w && w.done); }).length;
+    var next = true;
+    h += '<section class="panel list" id="daylist">';
+    days.forEach(function(d, i){
+      var w = works[i], line = esc(exLine(d));
+      if(w && w.done){
+        h += '<div class="drow"><button class="dmain" data-act="tropen" data-id="'+esc(w.id)+'"><i class="dnum ok" aria-hidden="true"></i>'
+          + '<span class="dtx"><b>День '+(i+1)+'</b><small>'+line+'</small></span></button><span class="ch" aria-hidden="true">›</span></div>';
+      } else if(vw===cw){
+        h += '<div class="drow todo" data-day="'+esc(d.id)+'"><button class="dmain" data-act="trstart" data-day="'+esc(d.id)+'">'
+          + '<i class="dnum'+(next?' next':'')+'" aria-hidden="true">'+(i+1)+'</i>'
+          + '<span class="dtx"><b>День '+(i+1)+'</b><small>'+(w ? 'Розпочато · ' : '')+line+'</small></span></button>'
+          + (left>1 ? '<button class="grip" aria-label="Перетягнути день '+(i+1)+'"></button>' : '')+'</div>';
+        next = false;
+      } else {
+        h += '<div class="drow"><div class="dmain"><i class="dnum" aria-hidden="true">–</i>'
+          + '<span class="dtx off"><b>День '+(i+1)+'</b><small>'+(w ? 'Розпочато, не завершено' : 'Не зроблено')+'</small></span></div>'
+          + '<button class="chip go" data-act="trstart" data-day="'+esc(d.id)+'" data-week="'+vw+'">Зробити</button></div>';
+      }
+    });
+    h += '</section>';
+    if(vw===cw && cw===c.weeks && !left){
+      h += '<section class="panel"><p class="note" style="margin:0">Цикл пройдено. Новий цикл створюється в «Налаштуваннях».</p>'
+        + '<button class="second" data-act="opencycles">Цикл тренувань</button></section>';
+    }
+    return h;
+  }
+
+  function workoutHTML(){
+    var w = wkCur, c = w ? findCycle(w.cycleId) : null;
+    if(!w || !c){ wkCur = null; view = 'train'; return trainHTML(); }
+    if(wkOpen>=w.ex.length) wkOpen = 0;
+    var h = '<div class="dayhead"><button class="navbtn" data-act="wkback" aria-label="Назад">‹</button>'
+      + '<h1 class="plain">День '+(dayNo(c, w.week, w.dayId) || '')+'<small>Цикл «'+esc(c.name)+'» · тиждень '+w.week+' з '+c.weeks+'</small></h1>'
+      + '<span class="wsub">'+(w.ex.length ? (wkOpen+1)+' з '+w.ex.length : '')+'</span></div>';
+    w.ex.forEach(function(e, i){
+      var last = lastSets(c, e, w.id), done = okSets(e);
+      if(i!==wkOpen){
+        var sub = done.length ? 'зроблено '+setsLine(done, e.eq) : last.length ? 'минулого тижня '+setsLine(last, e.eq) : e.sets.length+' × '+e.pr;
+        h += '<button class="excol" data-act="wkopen" data-i="'+i+'"><span class="dtx"><b>'+esc(e.name)+'</b><small>'+eqName(e.eq)+' · '+esc(sub)+'</small></span>'
+          + '<span class="ch" aria-hidden="true">›</span></button>';
+        return;
+      }
+      var body = e.eq==='body', now = -1;
+      e.sets.some(function(s, j){ if(!s.ok){ now = j; return true; } return false; });
+      h += '<section class="panel"><h2>'+esc(e.name)+'</h2><div class="seg s4">'
+        + EQ.map(function(k){ return '<button data-act="wkeq" data-v="'+k[0]+'" aria-pressed="'+(k[0]===e.eq)+'">'+k[1]+'</button>'; }).join('')
+        + '</div><div class="srow hd"><span></span><span>Минулого тижня</span><span>'+(body ? '' : 'кг')+'</span><span>повт.</span><span></span></div>';
+      e.sets.forEach(function(s, j){
+        h += '<div class="srow'+(s.ok ? ' ok' : j===now ? ' now' : '')+'"><span class="sn">'+(j+1)+'</span>'
+          + '<span class="sl">'+(last[j] ? setText(last[j], e.eq) : '—')+'</span>'
+          + (body ? '<span></span>' : '<input type="text" inputmode="decimal" autocomplete="off" data-wk="w" data-s="'+j+'" value="'+(s.w>0 ? fmtN(s.w) : '')+'" aria-label="Вага, підхід '+(j+1)+'">')
+          + '<input type="text" inputmode="numeric" autocomplete="off" data-wk="r" data-s="'+j+'" value="'+(s.r>0 ? s.r : '')+'" aria-label="Повтори, підхід '+(j+1)+'">'
+          + '<button class="sck" data-act="wkcheck" data-i="'+j+'" aria-pressed="'+!!s.ok+'" aria-label="Підхід '+(j+1)+' зроблено"></button></div>';
+      });
+      h += '<button class="second i-plus" data-act="wkaddset">Підхід</button></section>';
+    });
+    h += '<button class="primary" style="margin-top:0" id="wk-done" data-act="wkdone">'+(w.done ? 'Зберегти' : 'Завершити тренування')+'</button>';
+    if(wkStored()) h += '<button class="danger-ghost" data-act="wkdel">'+(armedWk ? 'Точно видалити?' : 'Видалити тренування')+'</button>';
+    return h;
+  }
+
+  function wdoneHTML(){
+    var w = workById(wdId), c = w ? findCycle(w.cycleId) : null;
+    if(!w || !c){ view = 'train'; return trainHTML(); }
+    var h = '<div class="dayhead"><button class="navbtn" data-act="wdback" aria-label="Назад">‹</button>'
+      + '<h1 class="plain">День '+(dayNo(c, w.week, w.dayId) || '')+'<small>Тиждень '+w.week+' · '+esc(shortDate(w.date))+'</small></h1><span style="width:40px"></span></div>';
+    w.ex.forEach(function(e){
+      var done = okSets(e);
+      h += '<section class="panel"><div class="cyhead"><b style="font-size:15px">'+esc(e.name)+'</b><span>'+eqName(e.eq)+'</span></div>'
+        + (done.length ? '<div class="tiles">'+done.map(function(s){ return '<span>'+setText(s, e.eq)+'</span>'; }).join('')+'</div>'
+                       : '<p class="note" style="margin:6px 0 0">Не виконано</p>')
+        + '</section>';
+    });
+    return h + '<button class="second" style="margin-top:0" data-act="wdfix">Виправити запис</button>';
+  }
+
+  /* moving on while some days of the week are not done asks first */
+  function openWeekSheet(){
+    var c = currentCycle();
+    if(!c) return;
+    var cw = cyWeek(c);
+    if(cw>=c.weeks) return;
+    var days = dayOrder(c, cw), miss = [], dots = '';
+    days.forEach(function(d, i){
+      var w = findWork(c, cw, d.id);
+      if(w && w.done) dots += '<i class="dnum ok"></i>';
+      else { miss.push(i+1); dots += '<i class="dnum todo">'+(i+1)+'</i>'; }
+    });
+    if(!miss.length){ nextWeek(); return; }
+    var txt = miss.length===1 ? 'День '+miss[0]+' лишиться незробленим.'
+      : 'Дні '+miss.slice(0,-1).join(', ')+' і '+miss[miss.length-1]+' лишаться незробленими.';
+    $('#weekview').innerHTML = '<p class="note" style="margin:0;text-align:center">Тиждень '+cw+' завершено не повністю</p>'
+      + '<div class="wkbig">Тиждень '+(cw+1)+'</div><div class="wdots" aria-hidden="true">'+dots+'</div>'
+      + '<p class="note" style="margin:14px 0;text-align:center">'+txt+'<br>Надолужити можна буде пізніше.</p>'
+      + '<button class="primary" data-act="wknext">Почати тиждень '+(cw+1)+'</button>'
+      + '<button class="stay" data-act="wkstay">Лишитись у тижні '+cw+'</button>';
+    only('weekview');
+    openOverlay();
+  }
+  function nextWeek(){
+    var c = currentCycle();
+    if(!c) return;
+    var cw = cyWeek(c);
+    if(cw<c.weeks){ c.week = cw+1; delete c.ord; delete c.ordW; c.u = Date.now(); save(); }
+    trWeek = 0;
+    closeSheet(); render(); window.scrollTo(0,0);
+  }
+
+  /* drag a day that is not done by its handle to another such day; done days keep their places */
+  var dg = null;
+  function dragEnd(apply){
+    if(!dg) return;
+    var d = dg; dg = null;
+    d.row.classList.remove('lift'); d.row.style.transform = '';
+    if(d.over) d.over.classList.remove('drop');
+    var c = currentCycle();
+    if(apply && d.over && c){
+      var cw = cyWeek(c), ids = dayOrder(c, cw).map(function(x){ return x.id; });
+      var open = ids.filter(function(id){ var w = findWork(c, cw, id); return !(w && w.done); });
+      var from = d.row.dataset.day, to = d.over.dataset.day, ti = open.indexOf(to);
+      if(open.indexOf(from)!==-1 && ti!==-1 && from!==to){
+        var rest = open.filter(function(id){ return id!==from; });
+        rest.splice(ti, 0, from);
+        var k = 0;
+        c.ord = ids.map(function(id){ return open.indexOf(id)===-1 ? id : rest[k++]; });
+        c.ordW = cw; c.u = Date.now();
+        save();
+      }
+    }
+    render();
+  }
+  $('#main').addEventListener('pointerdown', function(ev){
+    var g = ev.target.closest && ev.target.closest('.grip');
+    if(!g) return;
+    var row = g.closest('.drow');
+    if(!row) return;
+    dg = { row:row, y:ev.clientY, id:ev.pointerId, over:null };
+    row.classList.add('lift');
+    try{ g.setPointerCapture(ev.pointerId); }catch(e){}
+    ev.preventDefault();
+  });
+  $('#main').addEventListener('pointermove', function(ev){
+    if(!dg || ev.pointerId!==dg.id) return;
+    dg.row.style.transform = 'translateY('+(ev.clientY-dg.y)+'px)';
+    var over = null, y = ev.clientY;
+    document.querySelectorAll('#daylist .drow.todo').forEach(function(r){
+      if(r===dg.row) return;
+      var b = r.getBoundingClientRect();
+      if(y>=b.top && y<=b.bottom) over = r;
+    });
+    if(over!==dg.over){
+      if(dg.over) dg.over.classList.remove('drop');
+      if(over) over.classList.add('drop');
+      dg.over = over;
+    }
+  });
+  $('#main').addEventListener('pointerup', function(ev){ if(dg && ev.pointerId===dg.id) dragEnd(true); });
+  $('#main').addEventListener('pointercancel', function(ev){ if(dg && ev.pointerId===dg.id) dragEnd(false); });
+
   /* ---------- sheet ---------- */
-  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform','syncview','backupview','usdaview','exform'];
-  function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); refreshGates(); }
+  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform','syncview','backupview','usdaview','exform','weekview'];
+  function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); $('#sh-title').hidden = id==='weekview'; refreshGates(); }
   /* primary buttons stay visibly off, with the reason underneath, until the form can be saved */
   var GATES = [
     ['f-save', function(){ return !!$('#f-name').value.trim(); }, 'Введи назву, щоб зберегти'],
@@ -1612,6 +1971,9 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
       return !!cyDraft && !!cyDraft.name.trim() && cyDraft.days.some(function(d){ return d.ex.length>0; });
     }, 'Введи назву й додай вправи хоча б в один день'],
     ['cd-add', function(){ var el = $('#cd-text'); return !!el && !!el.value.trim(); }, 'Продиктуй або напиши хоча б одну вправу'],
+    ['wk-done', function(){
+      return !!wkCur && wkCur.ex.some(function(e){ return e.sets.some(function(x){ return x.ok; }); });
+    }, 'Відміть хоча б один підхід'],
     ['ex-save', function(){ return !!$('#ex-name').value.trim() && num($('#ex-sets').value)>0 && num($('#ex-reps').value)>0; }, 'Вкажи назву, підходи й повтори']
   ];
   function refreshGates(){
@@ -2136,7 +2498,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     var qc = t.closest('.qchip');
     if(qc){ $('#amt-val').value = qc.dataset.q; updateAmt(); return; }
     var tab = t.closest('.tab');
-    if(tab){ view = tab.dataset.view; armedReset=false; render(); window.scrollTo(0,0); return; }
+    if(tab){ if(wkCur && wkStored()) wkCommit(); wkCur = null; trWeek = 0; view = tab.dataset.view; armedReset=false; render(); window.scrollTo(0,0); return; }
 
     var it = t.closest('.pitem');
     if(it){
@@ -2286,6 +2648,60 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
       armedCd = false; view = 'cycle'; render(); window.scrollTo(0,0);
     }
     else if(act==='exedit'){ openEx(+b.dataset.i); }
+    else if(act==='trweek'){
+      var tc = currentCycle(), tn = +b.dataset.v;
+      if(!tc) return;
+      if(tn<=cyWeek(tc)){ trWeek = tn===cyWeek(tc) ? 0 : tn; render(); }
+      else if(tn===cyWeek(tc)+1) openWeekSheet();
+    }
+    else if(act==='wknext'){ nextWeek(); }
+    else if(act==='wkstay'){ closeSheet(); }
+    else if(act==='trstart'){ var sc = currentCycle(); if(sc) startWork(+b.dataset.week || cyWeek(sc), b.dataset.day); }
+    else if(act==='tropen'){ wdId = b.dataset.id; view = 'wdone'; render(); window.scrollTo(0,0); }
+    else if(act==='wdback'){ view = 'train'; render(); window.scrollTo(0,0); }
+    else if(act==='wdfix'){ var fw = workById(wdId); if(fw) openWork(fw, 'wdone'); }
+    else if(act==='wkback'){
+      if(wkCur && wkStored()) wkCommit();
+      if(wkCur && wkFrom==='wdone') wdId = wkCur.id;
+      wkCur = null; view = wkFrom==='wdone' ? 'wdone' : 'train'; render(); window.scrollTo(0,0);
+    }
+    else if(act==='wkopen'){ wkOpen = +b.dataset.i; armedWk = false; render(); }
+    else if(act==='wkcheck'){
+      var ce = wkCur && wkCur.ex[wkOpen], cs = ce && ce.sets[+b.dataset.i];
+      if(cs){ cs.ok = !cs.ok; wkCommit(); render(); }
+    }
+    else if(act==='wkaddset'){
+      var ae = wkCur && wkCur.ex[wkOpen];
+      if(ae && ae.sets.length<20){
+        var ls = ae.sets[ae.sets.length-1];
+        ae.sets.push({ w: ls ? ls.w : 0, r: ls ? ls.r : ae.pr, ok:false });
+        if(wkStored()) wkCommit();
+        render();
+      }
+    }
+    else if(act==='wkeq'){
+      var qe = wkCur && wkCur.ex[wkOpen], qc = wkCur && findCycle(wkCur.cycleId);
+      if(qe && qc && qe.eq!==b.dataset.v && EQ.some(function(k){ return k[0]===b.dataset.v; })){
+        qe.eq = b.dataset.v;
+        fillSets(qc, qe, wkCur.id);
+        /* the choice is remembered for this exercise in the plan of the cycle */
+        qc.days.forEach(function(d){ d.ex.forEach(function(x){ if(x.id===qe.exId && x.eq!==qe.eq){ x.eq = qe.eq; qc.u = Date.now(); } }); });
+        if(wkStored()) wkCommit(); else save();
+        render();
+      }
+    }
+    else if(act==='wkdone'){ finishWork(); }
+    else if(act==='wkdel'){
+      if(!armedWk){ armedWk = true; b.textContent = 'Точно видалити?'; return; }
+      armedWk = false;
+      if(wkCur){
+        var did2 = wkCur.id;
+        tomb(did2);
+        state.workouts = state.workouts.filter(function(x){ return x.id!==did2; });
+        save();
+      }
+      wkCur = null; view = 'train'; render(); window.scrollTo(0,0);
+    }
     else if(act==='openfoods'){ foodsBack = 'settings'; view = 'foods'; render(); window.scrollTo(0,0); }
     else if(act==='foodsback'){ view = foodsBack; render(); window.scrollTo(0,0); }
     else if(act==='goto'){ day = b.dataset.day; view='today'; render(); window.scrollTo(0,0); }
@@ -2324,6 +2740,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
   });
 
   document.addEventListener('change', function(ev){
+    if(ev.target.dataset && ev.target.dataset.wk){ if(wkStored()) wkCommit(); return; }
     if(ev.target.id==='m-file'){ if(ev.target.files && ev.target.files.length) addPhotos(Array.prototype.slice.call(ev.target.files)); ev.target.value = ''; return; }
     if(ev.target.dataset && ev.target.dataset.usda){ state.usdaKey = ev.target.value.trim(); save(); return; }
     var k = ev.target.dataset && ev.target.dataset.goal;
@@ -2344,6 +2761,20 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     else if(t.id==='f-serv') updateDishTotal();
     else if(t.id==='amt-val') updateAmt();
     else if(t.id==='cy-name'){ if(cyDraft){ cyDraft.name = t.value; saveDraft(); } }
+    else if(t.dataset && t.dataset.wk){
+      var we = wkCur && wkCur.ex[wkOpen], wi = +t.dataset.s, ws = we && we.sets[wi];
+      if(!ws) return;
+      if(t.dataset.wk==='w'){
+        ws.w = num(t.value); ws.t = 1;
+        /* a new weight carries over to the sets below that were not touched yet */
+        we.sets.forEach(function(x, j){
+          if(j<=wi || x.ok || x.t) return;
+          x.w = ws.w;
+          var el = document.querySelector('[data-wk="w"][data-s="'+j+'"]');
+          if(el) el.value = t.value;
+        });
+      } else ws.r = intIn(num(t.value),0,999,0);
+    }
     else if(t.id==='cd-text'){ var ce = $('#cd-err'); if(ce) ce.textContent = ''; }
     else if(t.dataset && t.dataset.ing!==undefined){
       var row = dishRows[+t.dataset.ing];
@@ -2364,6 +2795,7 @@ textarea.dict::placeholder{color:var(--muted);opacity:1}
     if(ev.key==='Escape'){ closeSheet(); return; }
     if(ev.key!=='Enter' || ev.target.tagName!=='INPUT') return;
     var id = ev.target.id;
+    if(ev.target.dataset.wk){ ev.target.blur(); return; }
     if(id==='rem-q'){ $('#rem-go').click(); }
     else if(id==='scan-manual'){ $('#scan-go').click(); }
     else if(id==='sync-pass' || id==='sync-email'){ login(); }
