@@ -154,7 +154,7 @@ label.field:not(.nopen)::after,.kcalbig::after,.amtbig::after{content:'';positio
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border:1.5px solid var(--fld);border-radius:12px;padding:3px;margin-bottom:10px}
 .seg button{border:0;background:transparent;padding:9px 4px;border-radius:9px;font-weight:500;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:6px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
-.seg:not(.s4) button[aria-pressed="true"]::before{content:'';flex:none;width:16px;height:16px;background:currentColor;-webkit-mask:var(--i-check) center/contain no-repeat;mask:var(--i-check) center/contain no-repeat}
+.seg:not(.s4):not(.s5) button[aria-pressed="true"]::before{content:'';flex:none;width:16px;height:16px;background:currentColor;-webkit-mask:var(--i-check) center/contain no-repeat;mask:var(--i-check) center/contain no-repeat}
 .lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
 .ing:first-child{border-top:0}
 .ing .amt{width:76px;flex:none;font-size:16px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--fld);background:var(--bg);text-align:right}
@@ -252,6 +252,14 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
 .toast.top{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}
 .toast span{flex:1;min-width:0}
 .toast button{flex:none;border:0;background:transparent;color:inherit;font-weight:600;text-decoration:underline;padding:6px 2px}
+.seg.s5{grid-template-columns:repeat(5,1fr)}
+textarea.dict{font-family:inherit;font-size:16px;line-height:1.45;min-height:120px;padding:10px 12px;display:block}
+textarea.dict::placeholder{color:var(--muted);opacity:1}
+.badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:var(--acc-text);background:color-mix(in srgb,var(--accent) 16%,transparent);vertical-align:middle}
+.lrow .ln small.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exq{flex:none;color:var(--muted);font-size:13px;white-space:nowrap}
+.exn{flex:none;font-weight:600;white-space:nowrap}
+.pen{flex:none;width:16px;height:16px;background:var(--muted);-webkit-mask:var(--i-pencil) center/contain no-repeat;mask:var(--i-pencil) center/contain no-repeat}
 </style>
 </head>
 <body>
@@ -365,6 +373,18 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
       <p class="note" style="margin:0 0 10px">Без ключа працює загальний DEMO_KEY, але в нього малий ліміт запитів. Безкоштовний ключ можна отримати на fdc.nal.usda.gov/api-key-signup. Ключ зберігається одразу.</p>
       <button class="ghost" id="usda-back">Закрити</button>
     </div>
+    <div id="exform" hidden>
+      <label class="field"><span>Назва</span><input id="ex-name" type="text" autocomplete="off"></label>
+      <span class="lbl">Чим виконуєш</span>
+      <div class="seg s4" id="ex-eq"><button type="button" data-eq="bar">Гриф</button><button type="button" data-eq="db">Гантелі</button><button type="button" data-eq="machine">Тренажер</button><button type="button" data-eq="body">Своя вага</button></div>
+      <div class="sgrid">
+        <label class="field"><span>Підходи</span><input id="ex-sets" type="text" inputmode="numeric" autocomplete="off"></label>
+        <label class="field"><span>Повтори</span><input id="ex-reps" type="text" inputmode="numeric" autocomplete="off"></label>
+      </div>
+      <button class="primary" id="ex-save">Зберегти</button>
+      <button class="danger-ghost" id="ex-del">Видалити вправу</button>
+      <button class="ghost" id="ex-back">Закрити</button>
+    </div>
   </div>
 </div>
 
@@ -373,7 +393,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
 <script>
 (function(){
   var KEY = 'kalorii:v1';
-  var state = { goal:{kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, entries:[], foods:[], measures:[], usdaKey:'', deleted:{}, updatedAt:0 };
+  var state = { goal:{kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, entries:[], foods:[], measures:[], cycles:[], workouts:[], usdaKey:'', deleted:{}, updatedAt:0 };
   var storageOk = true;
   var view = 'today';
   var day = iso(new Date());
@@ -422,6 +442,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
           state.entries = s.entries;
           state.foods = foodsFrom(s);
           state.measures = measuresFrom(s);
+          state.cycles = cyclesFrom(s);
+          state.workouts = worksFrom(s);
           state.updatedAt = +s.updatedAt || 0;
           state.deleted = s.deleted && typeof s.deleted==='object' ? s.deleted : {};
           state.usdaKey = typeof s.usdaKey === 'string' ? s.usdaKey : '';
@@ -688,6 +710,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
       + 'Зміни зберігаються одразу.</p></section>'
       + '<section class="panel"><h2>Норма на день</h2><div id="calc">'+calcHTML()+'</div></section>';
     h += '<section class="panel list">'
+      + lrow('opencycles', 'Цикл тренувань', '')
       + lrow('opensync', 'Синхронізація', '<span id="sync-short">'+syncShortHTML()+'</span>')
       + lrow('openbackup', 'Резервна копія', 'текстова копія даних, відновлення')
       + lrow('openusda', 'База USDA', state.usdaKey ? 'власний ключ API' : 'загальний ключ з лімітом')
@@ -704,14 +727,16 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
 
   var foodsBack = 'settings';
   function render(){
-    var cur = view==='foods' ? foodsBack : view;
+    var cur = view==='foods' ? foodsBack : (view==='cycles' || view==='cycle' || view==='cday') ? 'settings' : view;
     document.querySelectorAll('.tab').forEach(function(b){
       b.setAttribute('aria-current', b.dataset.view===cur ? 'page' : 'false');
     });
     swOpen = null;
     var m = $('#main');
-    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML() : settingsHTML();
+    m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML()
+      : view==='cycles' ? cyclesHTML() : view==='cycle' ? cycleHTML() : view==='cday' ? cdayHTML() : settingsHTML();
     hydratePhotos(m);
+    refreshGates();
   }
 
   /* ---------- measurements ---------- */
@@ -1134,6 +1159,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
       entries: mergeList(newer.entries, older.entries, dead),
       foods: mergeList(newer.foods, older.foods, dead),
       measures: mergeList(newer.measures, older.measures, dead),
+      cycles: mergeList(newer.cycles, older.cycles, dead),
+      workouts: mergeList(newer.workouts, older.workouts, dead),
       updatedAt: Math.max(+L.updatedAt||0, +R.updatedAt||0)
     };
   }
@@ -1141,13 +1168,15 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
   function sig(s){
     function ids(list){ return (list||[]).map(function(x){ return x.id+':'+(+x.u||0); }).sort(); }
     var g = s.goal||{};
-    return JSON.stringify([ids(s.entries), ids(s.foods), ids(s.measures),
+    return JSON.stringify([ids(s.entries), ids(s.foods), ids(s.measures), ids(s.cycles), ids(s.workouts),
       [+g.kcal||0, +g.weight||0, +g.pPerKg||0, +g.u||0], s.usdaKey||'', Object.keys(s.deleted||{}).sort()]);
   }
   function adopt(s){
     state.entries = Array.isArray(s.entries) ? s.entries : [];
     state.foods = foodsFrom(s);
     state.measures = measuresFrom(s);
+    state.cycles = cyclesFrom(s);
+    state.workouts = worksFrom(s);
     state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, s.goal||{});
     state.usdaKey = typeof s.usdaKey==='string' ? s.usdaKey : '';
     state.deleted = s.deleted && typeof s.deleted==='object' ? s.deleted : {};
@@ -1310,8 +1339,264 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
     return h;
   }
 
+  /* ---------- workout cycles: the plan (logging the workouts themselves is a separate step) ----------
+     A cycle has a name, a number of weeks and up to 7 days; a day is a list of exercises.
+     The cycle without `end` is the current one. Editing goes through a draft that is kept in
+     localStorage, so a dictated plan survives switching tabs or closing the app. */
+  var EQ = [['bar','Гриф'],['db','Гантелі'],['machine','Тренажер'],['body','Своя вага']];
+  var CY_WEEKS = [4,5,6,7,8];
+  function eqName(k){ var n = EQ[3][1]; EQ.forEach(function(e){ if(e[0]===k) n = e[1]; }); return n; }
+  function intIn(v, lo, hi, def){ var n = Math.round(+v); return isFinite(n) && n>=lo ? Math.min(n, hi) : def; }
+  function isDate(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+  function exFrom(e){
+    return { id:String(e.id||uid()), name:String(e.name).slice(0,60), eq: EQ.some(function(k){ return k[0]===e.eq; }) ? e.eq : 'body',
+             sets:intIn(e.sets,1,20,3), reps:intIn(e.reps,1,200,10) };
+  }
+  function daysFrom(list){
+    return (Array.isArray(list) ? list : []).filter(function(d){ return d && typeof d==='object'; }).slice(0,7).map(function(d){
+      return { id:String(d.id||uid()), ex:(Array.isArray(d.ex) ? d.ex : []).filter(function(e){ return e && e.name; }).map(exFrom) };
+    });
+  }
+  function cyclesFrom(s){
+    var list = Array.isArray(s.cycles) ? s.cycles : [];
+    return list.filter(function(x){ return x && x.id && x.name; }).map(function(x){
+      var o = { id:String(x.id), name:String(x.name), weeks:intIn(x.weeks,1,52,6),
+                start: isDate(x.start) ? x.start : iso(new Date()), end: isDate(x.end) ? x.end : '', days:daysFrom(x.days) };
+      if(+x.u>0) o.u = +x.u;
+      return o;
+    });
+  }
+  function worksFrom(s){ return Array.isArray(s.workouts) ? s.workouts.filter(function(x){ return x && x.id; }) : []; }
+  function findCycle(id){ var it = null; state.cycles.forEach(function(x){ if(x.id===id) it = x; }); return it; }
+  function currentCycle(){
+    var cur = null;
+    state.cycles.forEach(function(x){ if(!x.end && (!cur || x.start>cur.start || (x.start===cur.start && (+x.u||0)>(+cur.u||0)))) cur = x; });
+    return cur;
+  }
+  function weeksLabel(n){
+    var a = n%10, b = n%100;
+    return n+' '+(a===1 && b!==11 ? 'тиждень' : (a>=2 && a<=4 && (b<12 || b>14)) ? 'тижні' : 'тижнів');
+  }
+  function exLine(d){ return d.ex.length ? d.ex.map(function(e){ return e.name; }).join(', ') : 'Вправ ще немає'; }
+
+  var CYD_KEY = 'kalorii:cydraft', cyDraft = null, cyDay = 0, cdAdding = false, armedCy = false, armedCd = false;
+  try{
+    var d0 = JSON.parse(localStorage.getItem(CYD_KEY) || 'null');
+    if(d0 && typeof d0==='object') cyDraft = { id:String(d0.id||''), name:String(d0.name||''), weeks:intIn(d0.weeks,1,52,6), days:daysFrom(d0.days) };
+  }catch(e){}
+  function saveDraft(){
+    try{ if(cyDraft) localStorage.setItem(CYD_KEY, JSON.stringify(cyDraft)); else localStorage.removeItem(CYD_KEY); }catch(e){}
+  }
+  function newDraftStarted(){
+    return !!cyDraft && !cyDraft.id && (!!cyDraft.name.trim() || cyDraft.days.some(function(d){ return d.ex.length>0; }));
+  }
+  /* id: an existing cycle, or '' for a new one; an unfinished draft of the same cycle is continued */
+  function openCycle(id){
+    var c = id ? findCycle(id) : null;
+    if(id && !c) return;
+    if(!cyDraft || cyDraft.id!==(id||'')){
+      cyDraft = c ? { id:c.id, name:c.name, weeks:c.weeks, days:daysFrom(JSON.parse(JSON.stringify(c.days))) }
+                  : { id:'', name:'', weeks:6, days:[{ id:uid(), ex:[] }] };
+      saveDraft();
+    }
+    armedCy = false;
+    view = 'cycle'; render(); window.scrollTo(0,0);
+  }
+  function saveCycle(){
+    var d = cyDraft;
+    if(!d) return;
+    var name = d.name.trim(), days = d.days.filter(function(x){ return x.ex.length>0; });
+    if(!name || !days.length) return;
+    var now = Date.now(), today = iso(new Date());
+    var c = d.id ? findCycle(d.id) : null;
+    if(!c){
+      /* a new cycle closes the one that was running */
+      state.cycles.forEach(function(x){ if(!x.end){ x.end = today; x.u = now; } });
+      c = { id:uid(), start:today, end:'' };
+      state.cycles.push(c);
+    }
+    c.name = name; c.weeks = d.weeks; c.days = days; c.u = now;
+    cyDraft = null; saveDraft();
+    save();
+    view = 'cycles'; render(); window.scrollTo(0,0);
+    toast('Цикл збережено');
+  }
+  function deleteCycle(){
+    var id = cyDraft && cyDraft.id;
+    if(id){
+      tomb(id);
+      state.cycles = state.cycles.filter(function(x){ return x.id!==id; });
+      save();
+    }
+    cyDraft = null; saveDraft();
+    view = 'cycles'; render(); window.scrollTo(0,0);
+  }
+
+  function backHead(act, title){
+    return '<div class="dayhead"><button class="navbtn" data-act="'+act+'" aria-label="Назад">‹</button><h1 class="plain">'+title+'</h1><span style="width:40px"></span></div>';
+  }
+  function cyclesHTML(){
+    var cur = currentCycle();
+    var list = state.cycles.slice().sort(function(a,b){
+      if(a===cur) return -1;
+      if(b===cur) return 1;
+      return a.start<b.start ? 1 : a.start>b.start ? -1 : (+b.u||0)-(+a.u||0);
+    });
+    var h = backHead('cyclesback', 'Цикл тренувань')
+      + '<button class="second i-plus" style="margin:0 0 12px" data-act="newcycle">'+(newDraftStarted() ? 'Продовжити новий цикл' : 'Новий цикл')+'</button>';
+    if(!list.length){
+      return h + '<section class="panel"><p class="note" style="margin:0">Циклів ще немає. Створи перший: задай кількість тижнів, дні та вправи.</p></section>';
+    }
+    h += '<section class="panel list">';
+    list.forEach(function(c){
+      var when = c===cur ? 'з '+shortDate(c.start) : shortDate(c.start)+' – '+shortDate(c.end || c.start);
+      h += '<button class="lrow" data-act="opencycle" data-id="'+esc(c.id)+'"><span class="ln">'+esc(c.name)
+        + (c===cur ? '<span class="badge">Поточний</span>' : '')
+        + '<small>'+weeksLabel(c.weeks)+' · '+esc(when)+'</small></span><span class="ch" aria-hidden="true">›</span></button>';
+    });
+    return h + '</section>';
+  }
+  function cycleHTML(){
+    var d = cyDraft;
+    if(!d){ view = 'cycles'; return cyclesHTML(); }
+    var h = backHead('cycleback', d.id ? 'Цикл' : 'Новий цикл');
+    h += '<section class="panel">'
+      + '<label class="field"><span>Назва</span><input id="cy-name" type="text" autocomplete="off" placeholder="Наприклад, сила" value="'+esc(d.name)+'"></label>'
+      + '<span class="lbl">Тижнів у циклі</span><div class="seg s5" style="margin:0">'
+      + CY_WEEKS.map(function(n){ return '<button data-act="cyweeks" data-v="'+n+'" aria-pressed="'+(d.weeks===n)+'">'+n+'</button>'; }).join('')
+      + '</div></section>';
+    if(d.days.length){
+      h += '<section class="panel list">';
+      d.days.forEach(function(x, i){
+        h += '<button class="lrow" data-act="cyday" data-i="'+i+'"><span class="ln">День '+(i+1)
+          + '<small class="one">'+esc(exLine(x))+'</small></span><span class="ch" aria-hidden="true">›</span></button>';
+      });
+      h += '</section>';
+    }
+    if(d.days.length<7) h += '<button class="second i-plus" style="margin-top:0" data-act="cyaddday">День</button>';
+    h += '<button class="primary" style="margin-top:10px" id="cy-save" data-act="cysave">Зберегти цикл</button>';
+    if(d.id) h += '<button class="danger-ghost" data-act="cydel">'+(armedCy ? 'Точно видалити?' : 'Видалити цикл')+'</button>';
+    return h;
+  }
+  function cdayHTML(){
+    var d = cyDraft && cyDraft.days[cyDay];
+    if(!d){ view = 'cycle'; return cycleHTML(); }
+    var adding = !d.ex.length || cdAdding;
+    var h = backHead('cdayback', 'День '+(cyDay+1));
+    if(d.ex.length){
+      h += '<section class="panel list">';
+      d.ex.forEach(function(e, i){
+        h += '<button class="lrow" data-act="exedit" data-i="'+i+'" aria-label="Змінити: '+esc(e.name)+'"><span class="ln">'+esc(e.name)+'</span>'
+          + '<span class="exq">'+eqName(e.eq)+'</span><span class="exn">'+e.sets+' × '+e.reps+'</span><i class="pen" aria-hidden="true"></i></button>';
+      });
+      h += '</section>';
+    }
+    if(adding){
+      h += '<section class="panel"><textarea class="dict" id="cd-text" aria-label="Вправи дня" placeholder="Мікрофон на клавіатурі. Формат: вправа, чим, підходи по повторах"></textarea>'
+        + '<p class="err" id="cd-err" role="status" style="margin:6px 0 0"></p>'
+        + '<button class="'+(d.ex.length ? 'second' : 'primary')+'" style="margin-top:4px" id="cd-add" data-act="cdadd">Додати вправи</button></section>';
+    } else {
+      h += '<button class="second i-plus" style="margin-top:0" data-act="cdmore">Вправа</button>';
+    }
+    if(d.ex.length) h += '<button class="primary" style="margin-top:10px" data-act="cdayback">Готово</button>';
+    h += '<button class="danger-ghost" data-act="cddel">'+(armedCd ? 'Точно видалити?' : 'Видалити день')+'</button>';
+    return h;
+  }
+
+  /* dictated or typed text -> exercises. Expected shape: «жим лежачи гриф 4 по 8, підтягування 4 по 10».
+     Every «N по M» closes one exercise, so commas are optional (dictation often drops them). */
+  var NUMW = {'один':1,'одна':1,'одне':1,'два':2,'дві':2,'три':3,'чотири':4,'пять':5,'шість':6,'сім':7,'вісім':8,'девять':9,'десять':10,
+    'одинадцять':11,'дванадцять':12,'тринадцять':13,'чотирнадцять':14,'пятнадцять':15,'шістнадцять':16,'сімнадцять':17,'вісімнадцять':18,
+    'девятнадцять':19,'двадцять':20,'тридцять':30};
+  function wordsToDigits(s){
+    s = s.replace(/[A-Za-zА-Яа-яІіЇїЄєҐґ'’ʼ`]+/g, function(w){
+      var k = w.toLowerCase().replace(/['’ʼ`]/g, '');
+      return NUMW.hasOwnProperty(k) ? '\u0001'+NUMW[k] : w;
+    });
+    s = s.replace(/\u0001(20|30)\s+\u0001([1-9])(?!\d)/g, function(m, a, b){ return String(+a + +b); });
+    return s.replace(/\u0001/g, '');
+  }
+  var EQ_PATS = [
+    ['bar', /\s(?:(?:на|з|зі|із|зо)\s+)?(?:гриф|штанг)\S*(?=\s)/i],
+    ['db', /\s(?:(?:на|з|зі|із)\s+)?гантел\S*(?=\s)/i],
+    ['machine', /\s(?:(?:на|в|у)\s+)?тренажер\S*(?=\s)/i],
+    ['body', /\s(?:(?:з|зі|із)\s+)?(?:сво|власн)\S+\s+ваг\S*(?=\s)/i]
+  ];
+  function makeEx(raw, sets, reps){
+    var name = ' '+String(raw).replace(/[,;:.!?—–-]+/g, ' ')+' ', eq = '';
+    EQ_PATS.forEach(function(p){
+      if(!eq && p[1].test(name)){ eq = p[0]; name = name.replace(p[1], ' '); }
+    });
+    name = name.replace(/\s+/g, ' ').trim();
+    var prev;
+    do { prev = name; name = name.replace(/^(?:і|й|та|потім|далі|також|плюс)\s+/i, ''); } while(name!==prev);
+    if(!/[A-Za-zА-Яа-яІіЇїЄєҐґ]/.test(name)) return null;
+    return exFrom({ name:name.charAt(0).toUpperCase()+name.slice(1), eq:eq || 'body', sets:sets, reps:reps });
+  }
+  function parsePlan(text){
+    var out = [];
+    String(text||'').split(/\n+/).forEach(function(line){
+      var s = wordsToDigits(line).replace(/\s+/g, ' ');
+      var re = /(\d{1,2})\s*(?:підход\S*|підхід\S*|сет\S*|раз\S*)?\s*(?:по|на|х|x|×|\*)\s*(\d{1,3})(?:\s*(?:повтор\S*|раз\S*))?/gi;
+      var last = 0, m, ex;
+      while((m = re.exec(s))){
+        ex = makeEx(s.slice(last, m.index), +m[1], +m[2]);
+        last = re.lastIndex;
+        if(ex) out.push(ex);
+      }
+      /* what is left has no numbers: one exercise per comma, with the usual 3 × 10 */
+      s.slice(last).split(/[,;]+/).forEach(function(bit){
+        var e2 = makeEx(bit, 3, 10);
+        if(e2) out.push(e2);
+      });
+    });
+    return out;
+  }
+  function addParsed(){
+    var d = cyDraft && cyDraft.days[cyDay], el = $('#cd-text');
+    if(!d || !el) return;
+    var list = parsePlan(el.value);
+    if(!list.length){ $('#cd-err').textContent = 'Не вдалося розібрати. Спробуй так: жим лежачи гриф 4 по 8.'; return; }
+    d.ex = d.ex.concat(list);
+    cdAdding = false; armedCd = false;
+    saveDraft(); render();
+    toast('Вправ додано: '+list.length);
+  }
+
+  /* one exercise of the plan, edited in the sheet */
+  var exIdx = -1, exEq = 'body', armedEx = false;
+  function setExEq(k){
+    exEq = EQ.some(function(e){ return e[0]===k; }) ? k : 'body';
+    document.querySelectorAll('#ex-eq button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.eq===exEq ? 'true' : 'false'); });
+  }
+  function openEx(i){
+    var d = cyDraft && cyDraft.days[cyDay], e = d && d.ex[i];
+    if(!e) return;
+    exIdx = i; armedEx = false;
+    $('#ex-name').value = e.name;
+    $('#ex-sets').value = e.sets;
+    $('#ex-reps').value = e.reps;
+    setExEq(e.eq);
+    $('#ex-del').textContent = 'Видалити вправу';
+    $('#sh-title').textContent = 'Вправа';
+    only('exform');
+    openOverlay();
+  }
+  function saveEx(){
+    var d = cyDraft && cyDraft.days[cyDay], e = d && d.ex[exIdx];
+    var name = $('#ex-name').value.trim();
+    if(!e || !name) return;
+    d.ex[exIdx] = exFrom({ id:e.id, name:name, eq:exEq, sets:num($('#ex-sets').value), reps:num($('#ex-reps').value) });
+    saveDraft(); closeSheet(); render();
+  }
+  function deleteEx(){
+    var d = cyDraft && cyDraft.days[cyDay];
+    if(d && d.ex[exIdx]){ d.ex.splice(exIdx, 1); saveDraft(); }
+    closeSheet(); render();
+  }
+
   /* ---------- sheet ---------- */
-  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform','syncview','backupview','usdaview'];
+  var VIEWS = ['pick','amtview','mform','scanview','remoteview','newform','syncview','backupview','usdaview','exform'];
   function only(id){ VIEWS.forEach(function(v){ $('#'+v).hidden = (v!==id); }); refreshGates(); }
   /* primary buttons stay visibly off, with the reason underneath, until the form can be saved */
   var GATES = [
@@ -1322,7 +1607,12 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
     }, 'Вкажи вагу, замір або додай фото'],
     ['amt-add', function(){ return num($('#amt-val').value)>0; }, 'Введи кількість'],
     ['scan-go', function(){ return !!$('#scan-manual').value.trim(); }, 'Введи цифри штрихкоду'],
-    ['rem-go', function(){ return !!$('#rem-q').value.trim(); }, 'Введи назву англійською']
+    ['rem-go', function(){ return !!$('#rem-q').value.trim(); }, 'Введи назву англійською'],
+    ['cy-save', function(){
+      return !!cyDraft && !!cyDraft.name.trim() && cyDraft.days.some(function(d){ return d.ex.length>0; });
+    }, 'Введи назву й додай вправи хоча б в один день'],
+    ['cd-add', function(){ var el = $('#cd-text'); return !!el && !!el.value.trim(); }, 'Продиктуй або напиши хоча б одну вправу'],
+    ['ex-save', function(){ return !!$('#ex-name').value.trim() && num($('#ex-sets').value)>0 && num($('#ex-reps').value)>0; }, 'Вкажи назву, підходи й повтори']
   ];
   function refreshGates(){
     GATES.forEach(function(g){
@@ -1894,6 +2184,14 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
     if(t.id==='viewer-next'){ stepViewer(1); return; }
     if(t.closest('#viewer')) return;
     if(t.dataset && t.dataset.view && t.tagName==='IMG'){ openViewer(t.dataset.view, t); return; }
+    var eqb = t.closest('#ex-eq button');
+    if(eqb){ setExEq(eqb.dataset.eq); return; }
+    if(t.id==='ex-save'){ saveEx(); return; }
+    if(t.id==='ex-back'){ closeSheet(); return; }
+    if(t.id==='ex-del'){
+      if(!armedEx){ armedEx = true; t.textContent = 'Точно видалити?'; return; }
+      deleteEx(); return;
+    }
     if(t.id==='m-save'){ saveMeasure(); return; }
     if(t.id==='m-back'){ closeSheet(); return; }
     if(t.id==='m-del'){
@@ -1955,6 +2253,39 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
       $('#sh-title').textContent = 'База USDA';
       only('usdaview'); openOverlay();
     }
+    else if(act==='opencycles'){ view = 'cycles'; render(); window.scrollTo(0,0); }
+    else if(act==='cyclesback'){ view = 'settings'; render(); window.scrollTo(0,0); }
+    else if(act==='newcycle'){ openCycle(''); }
+    else if(act==='opencycle'){ openCycle(b.dataset.id); }
+    else if(act==='cycleback'){
+      /* leaving an existing cycle without saving drops the changes; a new cycle stays as a draft */
+      if(cyDraft && cyDraft.id){ cyDraft = null; saveDraft(); }
+      view = 'cycles'; render(); window.scrollTo(0,0);
+    }
+    else if(act==='cyweeks'){ if(cyDraft){ cyDraft.weeks = intIn(b.dataset.v,1,52,6); saveDraft(); render(); } }
+    else if(act==='cyday'){ cyDay = +b.dataset.i; cdAdding = false; armedCd = false; view = 'cday'; render(); window.scrollTo(0,0); }
+    else if(act==='cyaddday'){
+      if(cyDraft && cyDraft.days.length<7){
+        cyDraft.days.push({ id:uid(), ex:[] }); saveDraft();
+        cyDay = cyDraft.days.length-1; cdAdding = false; armedCd = false;
+        view = 'cday'; render(); window.scrollTo(0,0);
+      }
+    }
+    else if(act==='cysave'){ saveCycle(); }
+    else if(act==='cydel'){
+      if(!armedCy){ armedCy = true; b.textContent = 'Точно видалити?'; return; }
+      armedCy = false; deleteCycle();
+    }
+    else if(act==='cdayback'){ armedCy = false; view = 'cycle'; render(); window.scrollTo(0,0); }
+    else if(act==='cdmore'){ cdAdding = true; render(); setTimeout(function(){ var el = $('#cd-text'); if(el) el.focus(); }, 50); }
+    else if(act==='cdadd'){ addParsed(); }
+    else if(act==='cddel'){
+      var cd = cyDraft && cyDraft.days[cyDay];
+      if(cd && cd.ex.length && !armedCd){ armedCd = true; b.textContent = 'Точно видалити?'; return; }
+      if(cd){ cyDraft.days.splice(cyDay, 1); saveDraft(); }
+      armedCd = false; view = 'cycle'; render(); window.scrollTo(0,0);
+    }
+    else if(act==='exedit'){ openEx(+b.dataset.i); }
     else if(act==='openfoods'){ foodsBack = 'settings'; view = 'foods'; render(); window.scrollTo(0,0); }
     else if(act==='foodsback'){ view = foodsBack; render(); window.scrollTo(0,0); }
     else if(act==='goto'){ day = b.dataset.day; view='today'; render(); window.scrollTo(0,0); }
@@ -1975,6 +2306,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
         state.entries = s.entries;
         state.foods = foodsFrom(s);
         state.measures = measuresFrom(s);
+        state.cycles = cyclesFrom(s);
+        state.workouts = worksFrom(s);
         state.goal = Object.assign({kcal:2000,p:120,c:220,f:65,weight:0,pPerKg:2}, s.goal||{}); syncWeight();
         save(); render();
         $('#iomsg').textContent = 'Дані відновлено.';
@@ -2010,6 +2343,8 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
     else if(t.id==='ing-search') renderIngList();
     else if(t.id==='f-serv') updateDishTotal();
     else if(t.id==='amt-val') updateAmt();
+    else if(t.id==='cy-name'){ if(cyDraft){ cyDraft.name = t.value; saveDraft(); } }
+    else if(t.id==='cd-text'){ var ce = $('#cd-err'); if(ce) ce.textContent = ''; }
     else if(t.dataset && t.dataset.ing!==undefined){
       var row = dishRows[+t.dataset.ing];
       if(row){ row.amount = num(t.value); updateDishTotal(); }
@@ -2033,6 +2368,7 @@ textarea{width:100%;min-height:90px;font-size:13px;padding:9px;border-radius:12p
     else if(id==='scan-manual'){ $('#scan-go').click(); }
     else if(id==='sync-pass' || id==='sync-email'){ login(); }
     else if(id==='amt-val'){ commitAmt(); }
+    else if(id==='ex-name' || id==='ex-sets' || id==='ex-reps'){ if(!$('#ex-save').disabled) saveEx(); }
     else if(!$('#mform').hidden && id!=='m-file' && $('#overlay').classList.contains('open')){ saveMeasure(); }
     else if(!$('#newform').hidden && id!=='ing-search' && $('#overlay').classList.contains('open')){ saveFood(); }
   });
