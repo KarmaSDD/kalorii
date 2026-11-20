@@ -781,7 +781,7 @@ div.dmain{cursor:default}
 
   var foodsBack = 'settings';
   function render(){
-    var cur = view==='foods' ? foodsBack : (view==='cycles' || view==='cycle' || view==='cday') ? 'settings' : (view==='workout' || view==='wdone') ? 'train' : view;
+    var cur = view==='foods' ? foodsBack : (view==='cycles' || view==='cycle' || view==='cday' || view==='cyimport') ? 'settings' : (view==='workout' || view==='wdone') ? 'train' : view;
     document.querySelectorAll('.tab').forEach(function(b){
       b.setAttribute('aria-current', b.dataset.view===cur ? 'page' : 'false');
     });
@@ -789,7 +789,7 @@ div.dmain{cursor:default}
     var m = $('#main');
     m.innerHTML = view==='today' ? todayHTML() : view==='week' ? weekHTML() : view==='foods' ? foodsHTML() : view==='measures' ? measuresHTML()
       : view==='train' ? trainHTML() : view==='workout' ? workoutHTML() : view==='wdone' ? wdoneHTML()
-      : view==='cycles' ? cyclesHTML() : view==='cycle' ? cycleHTML() : view==='cday' ? cdayHTML() : settingsHTML();
+      : view==='cycles' ? cyclesHTML() : view==='cycle' ? cycleHTML() : view==='cday' ? cdayHTML() : view==='cyimport' ? cyimportHTML() : settingsHTML();
     hydratePhotos(m);
     refreshGates();
   }
@@ -1510,7 +1510,8 @@ div.dmain{cursor:default}
       return a.start<b.start ? 1 : a.start>b.start ? -1 : (+b.u||0)-(+a.u||0);
     });
     var h = backHead('cyclesback', 'Цикл тренувань')
-      + '<button class="second i-plus" style="margin:0 0 12px" data-act="newcycle">'+(newDraftStarted() ? 'Продовжити новий цикл' : 'Новий цикл')+'</button>';
+      + '<button class="second i-plus" style="margin:0 0 8px" data-act="newcycle">'+(newDraftStarted() ? 'Продовжити новий цикл' : 'Новий цикл')+'</button>'
+      + '<button class="second i-list" style="margin:0 0 12px" data-act="cyimport">Імпорт з чату</button>';
     if(!list.length){
       return h + '<section class="panel"><p class="note" style="margin:0">Циклів ще немає. Створи перший: задай кількість тижнів, дні та вправи.</p></section>';
     }
@@ -1628,6 +1629,169 @@ div.dmain{cursor:default}
     cdAdding = false; armedCd = false;
     saveDraft(); render();
     toast('Вправ додано: '+list.length);
+  }
+
+  /* ---------- import of a plan from a ChatGPT or Claude conversation ----------
+     The app cannot open shared chat links (no server, and the chat sites refuse other origins),
+     so the user asks the chat to rewrite the plan in a fixed shape and pastes the answer here.
+     The parser also copes with ordinary chat answers: markdown, numbered lists, tables, English. */
+  var IMP_PROMPT = 'Перепиши план тренувань з нашої розмови в такому форматі, без пояснень, без таблиць і без markdown:\n\n'
+    + 'Цикл: <коротка назва>\n'
+    + 'Тижнів: <число від 4 до 8>\n\n'
+    + 'День 1\n'
+    + '<назва вправи> — <інвентар> — <підходи> по <повтори>\n'
+    + '<наступна вправа>\n\n'
+    + 'День 2\n'
+    + '…\n\n'
+    + 'Правила: одна вправа в рядку. Інвентар — одне зі слів: гриф, гантелі, тренажер, своя вага. '
+    + 'Підходи й повтори — цілі числа, наприклад «4 по 8». Якщо повторів діапазон, напиши нижню межу. '
+    + 'Для вправ на час пиши секунди замість повторів. Не більше 7 днів. Якщо план різний по тижнях, дай план першого тижня. '
+    + 'Розминку й заминку не включай. Назви вправ українською.';
+  var impText = '';
+  var IMP_EQ = [
+    [/\bbarbells?\b/gi, 'гриф'], [/\bdumbbells?\b/gi, 'гантелі'], [/\b(?:machines?|cables?)\b/gi, 'тренажер'],
+    [/\bbody\s*-?\s*weight\b/gi, 'своя вага'], [/собственн\S*\s+вес\S*/gi, 'своя вага'], [/тренажё/gi, 'тренаже']
+  ];
+  var DAY_RE = /^(?:(?:день|day|тренування|тренировка|workout|training|session|заняття)\s*(?:№\s*)?(?:\d{1,2}|[A-ZА-ЯІЇЄ](?![A-Za-zА-Яа-яІіЇїЄєҐґ']))|(?:понеділок|вівторок|середа|четвер|п\W?ятниця|субота|неділя|понедельник|вторник|среда|четверг|пятница|суббота|воскресенье|monday|tuesday|wednesday|thursday|friday|saturday|sunday))(?![A-Za-zА-Яа-яІіЇїЄєҐґ])/i;
+  var WEEK_RE = /^(?:тиждень|week|неделя)\s*(\d{1,2})/i;
+  var NUMCELL = /^(\d{1,3})(?:\s*[-–—]\s*\d{1,3})?(?:\s*\S{0,6})?$/;
+  /* one pasted line -> plain text: markdown, list markers, table rows and English set words flattened */
+  function impLine(raw){
+    var s = String(raw).replace(/[*_`~]+/g, '').replace(/^\s*(?:#+|>)\s*/, '').trim();
+    if(/\|/.test(s)){
+      if(/^[\s|:\-–]+$/.test(s)) return '';
+      var cells = s.split('|').map(function(c){ return c.trim(); }).filter(Boolean), nums = [], words = [];
+      cells.forEach(function(c){
+        var m = c.match(NUMCELL);
+        if(m && nums.length<2) nums.push(m[1]);
+        else if(/^[A-Za-zА-Яа-яІіЇїЄєҐґ]/.test(c)) words.push(c);
+      });
+      s = nums.length===2 ? words.join(' ')+' '+nums[0]+' по '+nums[1] : cells.join(' ');
+    }
+    s = s.replace(/^\s*(?:[-–—•+·]|\d{1,2}[.)])\s+/, '');
+    IMP_EQ.forEach(function(p){ s = s.replace(p[0], p[1]); });
+    /* «(відпочинок 90 с)», «(RPE 8)» go away; «(гантелі)» stays as words */
+    s = s.replace(/\([^)]*\d[^)]*\)|\[[^\]]*\]/g, ' ').replace(/[()]/g, ' ');
+    s = wordsToDigits(s);
+    s = s.replace(/(\d{1,2})\s*(?:sets?|подход\S*)\s*(?:of|x|×|х|по|на)?\s*(\d{1,3})/gi, '$1 по $2');
+    return s.replace(/\s+/g, ' ').trim();
+  }
+  var EQ_WORD = [['bar', /^(?:з\s+)?(?:гриф|штанг)\S*$/i], ['db', /^(?:з\s+)?гантел\S*$/i], ['machine', /^(?:в\s+|у\s+)?тренажер\S*$/i],
+    ['body', /^(?:сво|власн)\S+\s+ваг\S*$/i]];
+  /* «Тяга гантелі в нахилі — гантелі — 3 по 10»: a part that is only the equipment sets it, the name stays whole */
+  function impEx(raw, sets, reps){
+    var parts = String(raw).split(/\s[—–-]\s|[:,;]\s*|[—–]/), eq = '', rest = [];
+    parts.forEach(function(p){
+      var t = p.trim(), hit = '';
+      EQ_WORD.forEach(function(w){ if(!hit && w[1].test(t)) hit = w[0]; });
+      if(hit && !eq) eq = hit; else if(t) rest.push(t);
+    });
+    var e;
+    if(eq){
+      var name = rest.join(' ').replace(/[,;:.!?—–-]+/g, ' ').replace(/\s+/g, ' ').trim();
+      if(!/[A-Za-zА-Яа-яІіЇїЄєҐґ]/.test(name)) return null;
+      e = exFrom({ name:name.charAt(0).toUpperCase()+name.slice(1), eq:eq, sets:sets, reps:reps });
+    } else {
+      e = makeEx(raw, sets, reps);
+      if(e && e.eq==='body' && !/(?:сво|власн)\S+\s+ваг/i.test(raw) && /блок|кросовер|смит|smith|тренажер/i.test(e.name)) e.eq = 'machine';
+    }
+    return e;
+  }
+  /* exercises of one line: only the «N по M» parts count, prose around them is ignored */
+  function impExercises(s){
+    var re = /(\d{1,2})\s*(?:підход\S*|підхід\S*|сет\S*|раз\S*)?\s*(?:по|на|х|x|×|\*)\s*(\d{1,3})/gi;
+    var out = [], last = 0, m, ex;
+    while((m = re.exec(s))){
+      ex = impEx(s.slice(last, m.index), +m[1], +m[2]);
+      /* the reps may be a range like 8–12: skip its upper end */
+      var tail = s.slice(re.lastIndex).match(/^\s*[-–—]\s*\d{1,3}/);
+      last = re.lastIndex + (tail ? tail[0].length : 0);
+      re.lastIndex = last;
+      if(ex) out.push(ex);
+    }
+    return out;
+  }
+  function parseImport(text){
+    var lines = String(text||'').split(/\r?\n/).map(impLine);
+    var explicit = lines.some(function(s){ return DAY_RE.test(s); });
+    var name = '', weeks = 0, days = [], cur = null, stop = false;
+    lines.forEach(function(s, i){
+      if(stop || !s) return;
+      var m;
+      if(!name && (m = s.match(/^(?:цикл|назва циклу|назва|програма|program|plan|name)\s*[:—–-]\s*(.+)$/i))){ name = m[1].trim().slice(0,40); return; }
+      if(!weeks && (m = s.match(/^(?:тижнів|тижні|тиждень|weeks|недель|недели)\s*[:—–-]\s*(\d{1,2})/i))){ weeks = +m[1]; return; }
+      if((m = s.match(WEEK_RE)) && +m[1]>=2 && days.some(function(d){ return d.ex.length; })){ stop = true; return; }
+      var head = DAY_RE.test(s);
+      if(!head && !explicit){
+        /* no «День N» anywhere: a short line without sets that ends with «:» or was a heading opens a day */
+        var raw = String(text).split(/\r?\n/)[i] || '';
+        head = !impExercises(s).length && s.length<=40 && (/:$/.test(s) || /^\s*(?:#|\*\*)/.test(raw));
+      }
+      if(head){
+        if(cur && !cur.ex.length) days.pop();
+        cur = { id:uid(), ex:[] }; days.push(cur);
+        var rest = s.replace(DAY_RE, '');
+        if(rest) cur.ex = cur.ex.concat(impExercises(rest));
+        return;
+      }
+      var list = impExercises(s);
+      if(!list.length) return;
+      if(!cur){ cur = { id:uid(), ex:[] }; days.push(cur); }
+      cur.ex = cur.ex.concat(list);
+    });
+    days = days.filter(function(d){ return d.ex.length>0; });
+    if(!weeks){
+      var w = String(text).match(/(\d{1,2})[ \t]*-?[ \t]*(?:тиж|week|недел)/i);
+      weeks = w ? +w[1] : 6;
+    }
+    return { name:name, weeks:Math.max(4, Math.min(8, weeks)), days:days.slice(0,7), more:days.length>7 };
+  }
+  function copyText(t){
+    function legacy(){
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+      var ok = false; try{ ok = document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+      return ok;
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(t).then(function(){ return true; }, function(){ return legacy(); });
+    }
+    return Promise.resolve(legacy());
+  }
+  var impShow = false;
+  function copyPrompt(){
+    copyText(IMP_PROMPT).then(function(ok){
+      if(ok) toast('Запит скопійовано');
+      else { impShow = true; render(); }
+    });
+  }
+  function cyimportHTML(){
+    var h = backHead('cyimpback', 'Імпорт з чату');
+    h += '<section class="panel"><p class="note" style="margin:0 0 10px">1. Скопіюй запит і встав його в розмову з ChatGPT чи Claude, де ви складали план.</p>'
+      + '<button class="second" style="margin:0" data-act="impcopy">Скопіювати запит</button>';
+    if(impShow) h += '<p class="note">Не вдалося скопіювати автоматично. Виділи текст і скопіюй сам:</p>'
+      + '<textarea class="dict" readonly aria-label="Запит для чату">'+esc(IMP_PROMPT)+'</textarea>';
+    h += '</section><section class="panel"><p class="note" style="margin:0 0 10px">2. Скопіюй відповідь чату й встав сюди.</p>'
+      + '<textarea class="dict" id="imp-text" aria-label="Відповідь чату" placeholder="Відповідь чату з планом">'+esc(impText)+'</textarea>'
+      + '<p class="err" id="imp-err" role="status" style="margin:6px 0 0"></p>'
+      + '<button class="primary" style="margin-top:4px" id="imp-go" data-act="impgo">Розібрати план</button>';
+    if(newDraftStarted()) h += '<p class="note">Незбережений новий цикл буде замінено.</p>';
+    return h + '</section>';
+  }
+  function runImport(){
+    var r = parseImport(impText);
+    if(!r.days.length){
+      $('#imp-err').textContent = 'Не знайшов жодної вправи з підходами й повторами. Скопіюй запит, встав у чат і встав сюди його відповідь.';
+      return;
+    }
+    cyDraft = { id:'', name:r.name || 'Цикл з чату', weeks:r.weeks, days:r.days };
+    saveDraft();
+    impText = ''; impShow = false; armedCy = false;
+    view = 'cycle'; render(); window.scrollTo(0,0);
+    var n = 0; r.days.forEach(function(d){ n += d.ex.length; });
+    toast('Днів: '+r.days.length+', вправ: '+n+(r.more ? '. Узято перші 7 днів' : '')+'. Перевір і збережи');
   }
 
   /* one exercise of the plan, edited in the sheet */
@@ -1970,6 +2134,7 @@ div.dmain{cursor:default}
     ['cy-save', function(){
       return !!cyDraft && !!cyDraft.name.trim() && cyDraft.days.some(function(d){ return d.ex.length>0; });
     }, 'Введи назву й додай вправи хоча б в один день'],
+    ['imp-go', function(){ var el = $('#imp-text'); return !!el && !!el.value.trim(); }, 'Встав відповідь чату'],
     ['cd-add', function(){ var el = $('#cd-text'); return !!el && !!el.value.trim(); }, 'Продиктуй або напиши хоча б одну вправу'],
     ['wk-done', function(){
       return !!wkCur && wkCur.ex.some(function(e){ return e.sets.some(function(x){ return x.ok; }); });
@@ -2618,6 +2783,10 @@ div.dmain{cursor:default}
     else if(act==='opencycles'){ view = 'cycles'; render(); window.scrollTo(0,0); }
     else if(act==='cyclesback'){ view = 'settings'; render(); window.scrollTo(0,0); }
     else if(act==='newcycle'){ openCycle(''); }
+    else if(act==='cyimport'){ impShow = false; view = 'cyimport'; render(); window.scrollTo(0,0); }
+    else if(act==='cyimpback'){ view = 'cycles'; render(); window.scrollTo(0,0); }
+    else if(act==='impcopy'){ copyPrompt(); }
+    else if(act==='impgo'){ runImport(); }
     else if(act==='opencycle'){ openCycle(b.dataset.id); }
     else if(act==='cycleback'){
       /* leaving an existing cycle without saving drops the changes; a new cycle stays as a draft */
@@ -2760,6 +2929,7 @@ div.dmain{cursor:default}
     else if(t.id==='ing-search') renderIngList();
     else if(t.id==='f-serv') updateDishTotal();
     else if(t.id==='amt-val') updateAmt();
+    else if(t.id==='imp-text'){ impText = t.value; var ie = $('#imp-err'); if(ie) ie.textContent = ''; }
     else if(t.id==='cy-name'){ if(cyDraft){ cyDraft.name = t.value; saveDraft(); } }
     else if(t.dataset && t.dataset.wk){
       var we = wkCur && wkCur.ex[wkOpen], wi = +t.dataset.s, ws = we && we.sets[wi];
